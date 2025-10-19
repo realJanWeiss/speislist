@@ -1,6 +1,8 @@
 package com.speislist.backend.auth;
 
 import com.speislist.backend.auth.dto.RegisterRequest;
+import com.speislist.backend.auth.exception.InvalidCredentialsException;
+import com.speislist.backend.auth.exception.UserAlreadyExistsException;
 import com.speislist.backend.user.User;
 import com.speislist.backend.user.UserRepository;
 import lombok.AllArgsConstructor;
@@ -16,7 +18,7 @@ public class AuthService {
 
     public void registerUser(RegisterRequest request) {
         if (userRepository.findByEmail(request.getEmail()) != null) {
-            throw new RuntimeException("Email already exists");
+            throw new UserAlreadyExistsException("Email already exists");
         }
         User user = new User();
         user.setEmail(request.getEmail());
@@ -27,7 +29,7 @@ public class AuthService {
     public User authenticate(String email, String password) {
         User user = userRepository.findByEmail(email);
         if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("Invalid email or password");
+            throw new InvalidCredentialsException("Invalid email or password");
         }
         return user;
     }
