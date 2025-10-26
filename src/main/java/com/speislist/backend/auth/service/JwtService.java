@@ -1,5 +1,7 @@
-package com.speislist.backend.auth;
+package com.speislist.backend.auth.service;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,5 +27,20 @@ public class JwtService {
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 hour
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    public Long parseToken(String jwt) {
+        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        Jws<Claims> claims;
+        try {
+            claims = Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(jwt);
+        } catch (Exception e) {
+            return null;
+        }
+
+        return Long.parseLong(claims.getPayload().getSubject());
     }
 }
