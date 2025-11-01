@@ -57,13 +57,18 @@ public class ShoppingListService {
                 .orElseThrow(() -> new ShoppingListNotFoundException(id));
     }
 
+    ShoppingList getShoppingEntityListById(long id, long userId) {
+        final var shoppingList = getShoppingEntityListById(id);
+        if (!isMemberOfShoppingList(shoppingList, userId)) {
+            throw new ShoppingListNotFoundException(id);
+        }
+        return shoppingList;
+    }
+
     @Transactional
     public ShoppingListDTO getShoppingListById(long id, long userId) {
         final var user = userService.getUserById(userId);
-        final var shoppingList = getShoppingEntityListById(id);
-        if (!isMemberOfShoppingList(shoppingList, user.getId())) {
-            throw new ShoppingListNotFoundException(id);
-        }
+        final var shoppingList = getShoppingEntityListById(id, user.getId());
         return ShoppingListMapper.toShoppingListDTO(shoppingList);
     }
 

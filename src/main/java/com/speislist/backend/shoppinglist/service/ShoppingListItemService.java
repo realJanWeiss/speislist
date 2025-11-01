@@ -5,6 +5,7 @@ import com.speislist.backend.shoppinglist.entity.ShoppingListItem;
 import com.speislist.backend.shoppinglist.exception.ShoppingListItemNotFoundException;
 import com.speislist.backend.shoppinglist.repository.ShoppingListItemRepository;
 import com.speislist.backend.shoppinglist.util.ShoppingListMapper;
+import com.speislist.backend.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,12 +15,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ShoppingListItemService {
+    private final UserService userService;
     private final ShoppingListItemRepository shoppingListItemRepository;
     private final ShoppingListService shoppingListService;
 
     @Transactional
-    public ShoppingListItemDTO createShoppingListItem(Long shoppingListId, String name, Integer quantity) {
-        final var shoppingList = shoppingListService.getShoppingEntityListById(shoppingListId);
+    public ShoppingListItemDTO createShoppingListItem(long shoppingListId, String name, Integer quantity, long userId) {
+        final var user = userService.getUserDTOById(userId);
+        final var shoppingList = shoppingListService.getShoppingEntityListById(shoppingListId, user.getId());
         final var item = new ShoppingListItem();
         item.setName(name);
         item.setQuantity(quantity);
@@ -28,10 +31,10 @@ public class ShoppingListItemService {
         return ShoppingListMapper.toShoppingListItemDTO(shoppingListItemRepository.save(item));
     }
 
-    public List<ShoppingListItemDTO> getShoppingListItems(Long shoppingListId) {
-        return shoppingListItemRepository.findByShoppingListId(shoppingListId).stream()
-                .map(ShoppingListMapper::toShoppingListItemDTO)
-                .toList();
+    @Transactional
+    public List<ShoppingListItemDTO> getShoppingListItems(long shoppingListId, long userId) {
+        final var user = userService.getUserDTOById(userId);
+        return shoppingListService.getShoppingListById(shoppingListId, user.getId()).getItems();
     }
 
     ShoppingListItem getShoppingListItemEntityById(Long id) {
@@ -53,8 +56,10 @@ public class ShoppingListItemService {
     }
 
     @Transactional
-    public void deleteShoppingListItem(Long id) {
-        if (!shoppingListItemRepository.existsById(id)) {
+    public void deleteShoppingListItem(long shoppingListId, long id, long userId) {
+        final var user = userService.getUserDTOById(userId);
+        final var shoppingList = shoppingListService.getShoppingListById(shoppingListId, user.getId());
+        if (shoppingList.getItems().stream().noneMatch(item -> item.getId().equals(id))) {
             throw new ShoppingListItemNotFoundException(id);
         }
         shoppingListItemRepository.deleteById(id);

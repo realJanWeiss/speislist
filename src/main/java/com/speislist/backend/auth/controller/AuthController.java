@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,7 +35,7 @@ public class AuthController {
 
     @PostMapping("/register")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User registered successfully",
+            @ApiResponse(responseCode = "201", description = "User registered successfully",
                     content = @Content(schema = @Schema(implementation = LoginResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid registration data provided",
                     content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
@@ -43,7 +44,7 @@ public class AuthController {
     })
     public ResponseEntity<LoginResponse> register(@Valid @RequestBody RegisterRequest request) {
         final var userDTO = authService.registerUser(request);
-        return createLoginResponse(userDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(getLoginResponse(userDTO));
     }
 
     @PostMapping("/login")
@@ -55,7 +56,7 @@ public class AuthController {
     })
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         final var userDTO = authService.authenticate(request.getEmail(), request.getPassword());
-        return createLoginResponse(userDTO);
+        return ResponseEntity.ok(getLoginResponse(userDTO));
     }
 
     @GetMapping("/current")
@@ -64,8 +65,8 @@ public class AuthController {
         return ResponseEntity.ok(userService.getUserDTOById(userId));
     }
 
-    private ResponseEntity<LoginResponse> createLoginResponse(UserDTO userDTO) {
+    private LoginResponse getLoginResponse(UserDTO userDTO) {
         final var token = jwtService.generateToken(userDTO.getId());
-        return ResponseEntity.ok(new LoginResponse(token, userDTO));
+        return new LoginResponse(token, userDTO);
     }
 }

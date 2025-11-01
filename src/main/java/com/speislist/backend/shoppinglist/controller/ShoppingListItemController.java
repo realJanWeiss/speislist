@@ -5,8 +5,11 @@ import com.speislist.backend.shoppinglist.dto.request.CreateShoppingListItemRequ
 import com.speislist.backend.shoppinglist.dto.request.UpdateShoppingListItemRequest;
 import com.speislist.backend.shoppinglist.dto.response.ShoppingListItemDTO;
 import com.speislist.backend.shoppinglist.service.ShoppingListItemService;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,38 +27,42 @@ import java.util.List;
 public class ShoppingListItemController {
     private final ShoppingListItemService shoppingListItemService;
 
-    @SecuredOperation(summary = "Create a shopping list item")
     @PostMapping
-    public ResponseEntity<ShoppingListItemDTO> createShoppingListItem(@PathVariable Long shoppingListId, @RequestBody CreateShoppingListItemRequest request) {
-        final var item = shoppingListItemService.createShoppingListItem(shoppingListId, request.getName(), request.getQuantity());
+    @SecuredOperation(summary = "Create a shopping list item")
+    public ResponseEntity<ShoppingListItemDTO> createShoppingListItem(@PathVariable Long shoppingListId,
+                                                                      @Valid @RequestBody CreateShoppingListItemRequest request,
+                                                                      @AuthenticationPrincipal Long userId) {
+        final var item = shoppingListItemService.createShoppingListItem(shoppingListId, request.getName(),
+                request.getQuantity(), userId);
         return ResponseEntity.ok(item);
     }
 
-    @SecuredOperation(summary = "Get all items for a shopping list")
     @GetMapping
-    public ResponseEntity<List<ShoppingListItemDTO>> getShoppingListItems(@PathVariable Long shoppingListId) {
-        final var items = shoppingListItemService.getShoppingListItems(shoppingListId);
+    @SecuredOperation(summary = "Get all items for a shopping list")
+    public ResponseEntity<List<ShoppingListItemDTO>> getShoppingListItems(@PathVariable Long shoppingListId, @AuthenticationPrincipal Long userId) {
+        final var items = shoppingListItemService.getShoppingListItems(shoppingListId, userId);
         return ResponseEntity.ok(items);
     }
 
-    @SecuredOperation(summary = "Get a shopping list item by ID")
     @GetMapping("/{id}")
+    @SecuredOperation(summary = "Get a shopping list item by ID")
     public ResponseEntity<ShoppingListItemDTO> getShoppingListItem(@PathVariable Long shoppingListId, @PathVariable Long id) {
         final var item = shoppingListItemService.getShoppingListItemById(id);
         return ResponseEntity.ok(item);
     }
 
-    @SecuredOperation(summary = "Update a shopping list item")
     @PutMapping("/{id}")
-    public ResponseEntity<ShoppingListItemDTO> updateShoppingListItem(@PathVariable Long shoppingListId, @PathVariable Long id, @RequestBody UpdateShoppingListItemRequest request) {
+    @SecuredOperation(summary = "Update a shopping list item")
+    public ResponseEntity<ShoppingListItemDTO> updateShoppingListItem(@PathVariable Long shoppingListId, @PathVariable Long id, @Valid @RequestBody UpdateShoppingListItemRequest request) {
         final var item = shoppingListItemService.updateShoppingListItem(id, request.getName(), request.getQuantity(), request.getIsCompleted());
         return ResponseEntity.ok(item);
     }
 
-    @SecuredOperation(summary = "Delete a shopping list item")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteShoppingListItem(@PathVariable Long shoppingListId, @PathVariable Long id) {
-        shoppingListItemService.deleteShoppingListItem(id);
+    @SecuredOperation(summary = "Delete a shopping list item")
+    @ApiResponse(responseCode = "204", description = "Shopping list item deleted successfully")
+    public ResponseEntity<Void> deleteShoppingListItem(@PathVariable Long shoppingListId, @PathVariable Long id, @AuthenticationPrincipal Long userId) {
+        shoppingListItemService.deleteShoppingListItem(shoppingListId, id, userId);
         return ResponseEntity.noContent().build();
     }
 }
