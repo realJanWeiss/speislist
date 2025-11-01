@@ -8,61 +8,74 @@ import com.speislist.backend.shoppinglist.exception.ShoppingListNotFoundExceptio
 import com.speislist.backend.shoppinglist.repository.ShoppingListRepository;
 import com.speislist.backend.shoppinglist.repository.UserShoppingListRepository;
 import com.speislist.backend.shoppinglist.util.ShoppingListMapper;
+import com.speislist.backend.user.UserService;
 import com.speislist.backend.user.entity.User;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class ShoppingListService {
+    private final UserService userService;
     private final ShoppingListRepository shoppingListRepository;
     private final UserShoppingListRepository userShoppingListRepository;
 
     @Transactional
-    public ShoppingListDTO createShoppingList(String name, User creator) {
+    public ShoppingListDTO createShoppingList(String name, long userId) {
+        final var user = userService.getUserById(userId);
+
         var shoppingList = new ShoppingList();
         shoppingList.setName(name);
         shoppingList.setCreatedAt(LocalDateTime.now());
-        shoppingList = shoppingListRepository.save(shoppingList);
 
-        var userShoppingList = new UserShoppingList();
-        userShoppingList.setId(new UserShoppingListId(creator.getId(), shoppingList.getId()));
-        userShoppingList.setUser(creator);
+        final var userShoppingList = new UserShoppingList();
+        userShoppingList.setId(new UserShoppingListId(user.getId(), shoppingList.getId()));
+        userShoppingList.setUser(user);
         userShoppingList.setShoppingList(shoppingList);
-        userShoppingListRepository.save(userShoppingList);
 
+        shoppingList.setUserShoppingLists(Set.of(userShoppingList));
+
+        shoppingList = shoppingListRepository.save(shoppingList);
         return ShoppingListMapper.toShoppingListDTO(shoppingList);
     }
 
-    public List<ShoppingListDTO> getShoppingListsByUser(User user) {
+    public List<ShoppingListDTO> getShoppingListsByUser(long userId) {
+        final var user = userService.getUserById(userId);
         return shoppingListRepository.findByUserId(user.getId()).stream()
                 .map(ShoppingListMapper::toShoppingListDTO)
                 .toList();
     }
 
-    ShoppingList getShoppingEntityListById(Long id) {
+    ShoppingList getShoppingEntityListById(long id) {
         return shoppingListRepository.findById(id)
                 .orElseThrow(() -> new ShoppingListNotFoundException(id));
     }
 
-    public ShoppingListDTO getShoppingListById(Long id) {
+    public ShoppingListDTO getShoppingListById(long id, long userId) {
+        final var user = userService.getUserById(userId);
         final var shoppingList = getShoppingEntityListById(id);
+        shoppingList.getUserShoppingLists().stream()
+                .filter(userShoppingList -> userShoppingList.getUser().getId().equals(user.getId()))
+                .findFirst()
+                .orElseThrow(() -> new ShoppingListNotFoundException(id));
         return ShoppingListMapper.toShoppingListDTO(shoppingList);
     }
 
     @Transactional
-    public ShoppingListDTO updateShoppingList(Long id, String name) {
+    public ShoppingListDTO updateShoppingList(long id, String name) {
         final var shoppingList = getShoppingEntityListById(id);
         shoppingList.setName(name);
         return ShoppingListMapper.toShoppingListDTO(shoppingListRepository.save(shoppingList));
     }
 
     @Transactional
-    public void deleteShoppingList(Long id) {
+    public void deleteShoppingList(long id) {
         if (!shoppingListRepository.existsById(id)) {
             throw new ShoppingListNotFoundException(id);
         }
@@ -70,7 +83,7 @@ public class ShoppingListService {
     }
 
     @Transactional
-    public void addUserToShoppingList(Long shoppingListId, User user) {
+    public void addUserToShoppingList(long shoppingListId, @NotNull User user) {
         final var shoppingList = getShoppingEntityListById(shoppingListId);
         UserShoppingListId id = new UserShoppingListId(user.getId(), shoppingListId);
         if (userShoppingListRepository.existsById(id)) {
@@ -84,7 +97,7 @@ public class ShoppingListService {
     }
 
     @Transactional
-    public void removeUserFromShoppingList(Long shoppingListId, User user) {
+    public void removeUserFromShoppingList(long shoppingListId, @NotNull User user) {
         UserShoppingListId id = new UserShoppingListId(user.getId(), shoppingListId);
         userShoppingListRepository.deleteById(id);
     }

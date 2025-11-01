@@ -4,17 +4,31 @@ import com.speislist.backend.shoppinglist.dto.response.ShoppingListDTO;
 import com.speislist.backend.shoppinglist.dto.response.ShoppingListItemDTO;
 import com.speislist.backend.shoppinglist.entity.ShoppingList;
 import com.speislist.backend.shoppinglist.entity.ShoppingListItem;
+import com.speislist.backend.user.util.UserMapper;
+
+import java.util.List;
 
 public class ShoppingListMapper {
+
+    private ShoppingListMapper() {
+    }
 
     public static ShoppingListDTO toShoppingListDTO(ShoppingList shoppingList) {
         final var shoppingListDTO = new ShoppingListDTO();
         shoppingListDTO.setId(shoppingList.getId());
         shoppingListDTO.setName(shoppingList.getName());
         shoppingListDTO.setCreatedAt(shoppingList.getCreatedAt());
-        shoppingListDTO.setItems(shoppingList.getItems().stream()
+        shoppingListDTO.setItems(shoppingList.getItems() != null
+                ? shoppingList.getItems().stream()
                 .map(ShoppingListMapper::toShoppingListItemDTO)
-                .toList());
+                .toList()
+                : List.of());
+        shoppingListDTO.setMembers(shoppingList.getUserShoppingLists() != null
+                ? shoppingList.getUserShoppingLists().stream()
+                .map(userShoppingList -> UserMapper.toUserDTO(userShoppingList.getUser()))
+                .toList()
+                : List.of()
+        );
         return shoppingListDTO;
     }
 

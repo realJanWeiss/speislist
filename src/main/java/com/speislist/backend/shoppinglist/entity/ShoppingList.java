@@ -1,5 +1,6 @@
 package com.speislist.backend.shoppinglist.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,7 +25,7 @@ public class ShoppingList {
 
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "shoppingList")
+    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.PERSIST)
     private Set<UserShoppingList> userShoppingLists;
 
     @OneToMany(mappedBy = "shoppingList")

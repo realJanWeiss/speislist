@@ -20,9 +20,9 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 
-        JwtAuthenticationToken jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
+        var jwtAuthenticationToken = (JwtAuthenticationToken) authentication;
 
-        List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
+        final var grantedAuthorityList = new ArrayList<GrantedAuthority>();
         grantedAuthorityList.add(new SimpleGrantedAuthority("ROLE_USER"));
 
         final var jwt = jwtAuthenticationToken.getJwt();

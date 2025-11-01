@@ -1,5 +1,6 @@
 package com.speislist.backend.shoppinglist.dto.response;
 
+import com.speislist.backend.user.dto.UserDTO;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -11,5 +12,6 @@ public class ShoppingListDTO {
     private String name;
     private LocalDateTime createdAt;
     private List<ShoppingListItemDTO> items;
+    private List<UserDTO> members;
 }
 

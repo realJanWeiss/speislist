@@ -30,7 +30,7 @@ public class JwtService {
     }
 
     public Long parseToken(String jwt) {
-        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        final var key = Keys.hmacShaKeyFor(secretKey.getBytes());
         Jws<Claims> claims;
         try {
             claims = Jwts.parser()

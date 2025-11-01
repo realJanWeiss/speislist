@@ -21,14 +21,14 @@ public class AuthService {
         if (userRepository.findByEmail(request.getEmail()) != null) {
             throw new UserAlreadyExistsException(request.getEmail());
         }
-        User user = new User();
+        final var user = new User();
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         return UserMapper.toUserDTO(userRepository.save(user));
     }
 
     public UserDTO authenticate(String email, String password) {
-        User user = userRepository.findByEmail(email);
+        final var user = userRepository.findByEmail(email);
         if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
             throw new InvalidCredentialsException("Invalid email or password");
         }

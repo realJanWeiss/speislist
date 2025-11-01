@@ -8,6 +8,7 @@ import com.speislist.backend.auth.dto.request.LoginRequest;
 import com.speislist.backend.auth.dto.request.RegisterRequest;
 import com.speislist.backend.user.UserService;
 import com.speislist.backend.user.dto.UserDTO;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,13 +28,13 @@ public class AuthController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<LoginResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<LoginResponse> register(@Valid @RequestBody RegisterRequest request) {
         final var userDTO = authService.registerUser(request);
         return createLoginResponse(userDTO);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         final var userDTO = authService.authenticate(request.getEmail(), request.getPassword());
         return createLoginResponse(userDTO);
     }
@@ -41,7 +42,7 @@ public class AuthController {
     @GetMapping("/current")
     @SecuredOperation
     public ResponseEntity<UserDTO> getCurrentUser(@AuthenticationPrincipal Long userId) {
-        return ResponseEntity.ok(userService.getUserById(userId));
+        return ResponseEntity.ok(userService.getUserDTOById(userId));
     }
 
     private ResponseEntity<LoginResponse> createLoginResponse(UserDTO userDTO) {
