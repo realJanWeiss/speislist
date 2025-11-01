@@ -57,13 +57,13 @@ public class ShoppingListService {
                 .orElseThrow(() -> new ShoppingListNotFoundException(id));
     }
 
+    @Transactional
     public ShoppingListDTO getShoppingListById(long id, long userId) {
         final var user = userService.getUserById(userId);
         final var shoppingList = getShoppingEntityListById(id);
-        shoppingList.getUserShoppingLists().stream()
-                .filter(userShoppingList -> userShoppingList.getUser().getId().equals(user.getId()))
-                .findFirst()
-                .orElseThrow(() -> new ShoppingListNotFoundException(id));
+        if (!isMemberOfShoppingList(shoppingList, user.getId())) {
+            throw new ShoppingListNotFoundException(id);
+        }
         return ShoppingListMapper.toShoppingListDTO(shoppingList);
     }
 
@@ -75,8 +75,10 @@ public class ShoppingListService {
     }
 
     @Transactional
-    public void deleteShoppingList(long id) {
-        if (!shoppingListRepository.existsById(id)) {
+    public void deleteShoppingList(long id, long userId) {
+        final var shoppingList = getShoppingEntityListById(id);
+        final var user = userService.getUserById(userId);
+        if (!isMemberOfShoppingList(shoppingList, user.getId())) {
             throw new ShoppingListNotFoundException(id);
         }
         shoppingListRepository.deleteById(id);
@@ -100,5 +102,10 @@ public class ShoppingListService {
     public void removeUserFromShoppingList(long shoppingListId, @NotNull User user) {
         UserShoppingListId id = new UserShoppingListId(user.getId(), shoppingListId);
         userShoppingListRepository.deleteById(id);
+    }
+
+    private boolean isMemberOfShoppingList(ShoppingList shoppingList, long userId) {
+        return shoppingList.getUserShoppingLists().stream()
+                .anyMatch(userShoppingList -> userShoppingList.getUser().getId().equals(userId));
     }
 }

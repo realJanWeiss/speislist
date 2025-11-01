@@ -52,8 +52,8 @@ public class ShoppingListController {
 
     @SecuredOperation(summary = "Delete a shopping list")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteShoppingList(@PathVariable Long id) {
-        shoppingListService.deleteShoppingList(id);
+    public ResponseEntity<Void> deleteShoppingList(@PathVariable Long id, @AuthenticationPrincipal Long userId) {
+        shoppingListService.deleteShoppingList(id, userId);
         return ResponseEntity.noContent().build();
     }
 }

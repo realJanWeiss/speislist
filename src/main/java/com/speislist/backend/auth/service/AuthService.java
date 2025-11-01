@@ -7,6 +7,7 @@ import com.speislist.backend.user.dto.UserDTO;
 import com.speislist.backend.user.entity.User;
 import com.speislist.backend.user.exception.UserAlreadyExistsException;
 import com.speislist.backend.user.util.UserMapper;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.AllArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -27,10 +28,10 @@ public class AuthService {
         return UserMapper.toUserDTO(userRepository.save(user));
     }
 
-    public UserDTO authenticate(String email, String password) {
+    public UserDTO authenticate(@NotEmpty String email, @NotEmpty String password) {
         final var user = userRepository.findByEmail(email);
         if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
-            throw new InvalidCredentialsException("Invalid email or password");
+            throw new InvalidCredentialsException();
         }
         return UserMapper.toUserDTO(user);
     }
