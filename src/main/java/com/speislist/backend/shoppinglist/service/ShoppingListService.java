@@ -57,6 +57,9 @@ public class ShoppingListService {
                 .orElseThrow(() -> new ShoppingListNotFoundException(id));
     }
 
+    /**
+     * Get ShoppingList and validate user is a member of the shopping list
+     */
     ShoppingList getShoppingEntityListById(long id, long userId) {
         final var shoppingList = getShoppingEntityListById(id);
         if (!isMemberOfShoppingList(shoppingList, userId)) {
@@ -109,8 +112,14 @@ public class ShoppingListService {
         userShoppingListRepository.deleteById(id);
     }
 
-    private boolean isMemberOfShoppingList(ShoppingList shoppingList, long userId) {
+    private boolean isMemberOfShoppingList(@NotNull ShoppingList shoppingList, long userId) {
         return shoppingList.getUserShoppingLists().stream()
                 .anyMatch(userShoppingList -> userShoppingList.getUser().getId().equals(userId));
+    }
+
+    void validateUserCanAccessShoppingList(@NotNull ShoppingList shoppingList, long userId) {
+        if (!isMemberOfShoppingList(shoppingList, userId)) {
+            throw new ShoppingListNotFoundException(shoppingList.getId());
+        }
     }
 }

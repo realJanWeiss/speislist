@@ -1,7 +1,6 @@
 package com.speislist.backend.auth;
 
 import com.speislist.backend.auth.service.JwtService;
-import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -10,12 +9,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.ArrayList;
-import java.util.List;
 
-@AllArgsConstructor
-public class JwtAuthenticationProvider implements AuthenticationProvider {
-
-    private final JwtService jwtService;
+public record JwtAuthenticationProvider(JwtService jwtService) implements AuthenticationProvider {
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {

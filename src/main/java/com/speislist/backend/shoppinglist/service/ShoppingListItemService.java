@@ -6,11 +6,13 @@ import com.speislist.backend.shoppinglist.exception.ShoppingListItemNotFoundExce
 import com.speislist.backend.shoppinglist.repository.ShoppingListItemRepository;
 import com.speislist.backend.shoppinglist.util.ShoppingListMapper;
 import com.speislist.backend.user.UserService;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 @Service
 @RequiredArgsConstructor
@@ -37,31 +39,57 @@ public class ShoppingListItemService {
         return shoppingListService.getShoppingListById(shoppingListId, user.getId()).getItems();
     }
 
-    ShoppingListItem getShoppingListItemEntityById(Long id) {
+    private ShoppingListItem getShoppingListItemEntityById(Long id) {
         return shoppingListItemRepository.findById(id)
                 .orElseThrow(() -> new ShoppingListItemNotFoundException(id));
     }
 
-    public ShoppingListItemDTO getShoppingListItemById(Long id) {
-        return ShoppingListMapper.toShoppingListItemDTO(getShoppingListItemEntityById(id));
+    public ShoppingListItemDTO getShoppingListItemById(long shoppingListId, long id) {
+        final var shoppingListItem = getShoppingListItemEntityById(id);
+        validateItemBelongsToShoppingList(shoppingListItem, shoppingListId);
+        return ShoppingListMapper.toShoppingListItemDTO(shoppingListItem);
     }
 
-    @Transactional
-    public ShoppingListItemDTO updateShoppingListItem(Long id, String name, Integer quantity, Boolean isCompleted) {
+    private ShoppingListItemDTO performUpdateShoppingListItem(long shoppingListId, long id, long userId, Consumer<ShoppingListItem> changer) {
         final var item = getShoppingListItemEntityById(id);
-        if (name != null) item.setName(name);
-        if (quantity != null) item.setQuantity(quantity);
-        if (isCompleted != null) item.setIsCompleted(isCompleted);
+        validateItemBelongsToShoppingList(item, shoppingListId);
+        shoppingListService.validateUserCanAccessShoppingList(item.getShoppingList(), userId);
+        changer.accept(item);
         return ShoppingListMapper.toShoppingListItemDTO(shoppingListItemRepository.save(item));
     }
 
     @Transactional
+    public ShoppingListItemDTO updateShoppingListItem(long shoppingListId, long id, String name, Integer quantity, Boolean isCompleted, long userId) {
+        return performUpdateShoppingListItem(shoppingListId, id, userId, item -> {
+            if (name != null) item.setName(name);
+            if (quantity != null) item.setQuantity(quantity);
+            if (isCompleted != null) item.setIsCompleted(isCompleted);
+        });
+    }
+
+    /**
+     * null values will overwrite existing values
+     */
+    @Transactional
+    public ShoppingListItemDTO replaceShoppingListItem(long shoppingListId, long id, @NotNull String name, Integer quantity, Boolean isCompleted, long userId) {
+        return performUpdateShoppingListItem(shoppingListId, id, userId, item -> {
+            item.setName(name);
+            item.setQuantity(quantity);
+            item.setIsCompleted(isCompleted);
+        });
+    }
+
+    @Transactional
     public void deleteShoppingListItem(long shoppingListId, long id, long userId) {
-        final var user = userService.getUserDTOById(userId);
-        final var shoppingList = shoppingListService.getShoppingListById(shoppingListId, user.getId());
-        if (shoppingList.getItems().stream().noneMatch(item -> item.getId().equals(id))) {
-            throw new ShoppingListItemNotFoundException(id);
-        }
+        final var shoppingListItem = getShoppingListItemEntityById(id);
+        validateItemBelongsToShoppingList(shoppingListItem, shoppingListId);
+        shoppingListService.validateUserCanAccessShoppingList(shoppingListItem.getShoppingList(), userId);
         shoppingListItemRepository.deleteById(id);
+    }
+
+    private void validateItemBelongsToShoppingList(ShoppingListItem item, long shoppingListId) {
+        if (item.getShoppingList().getId() != shoppingListId) {
+            throw new ShoppingListItemNotFoundException(item.getId());
+        }
     }
 }
