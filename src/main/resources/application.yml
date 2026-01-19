@@ -3,6 +3,20 @@ spring:
     name: speislist-backend
   profiles:
     active: dev
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/myrealm}
+        registration:
+          keycloak:
+            provider: keycloak
+            client-id: ${KEYCLOAK_CLIENT_ID:speislist-backend}
+            client-secret: ${KEYCLOAK_CLIENT_SECRET:UREROBh2qeJ24YsRLrsIi9Xwj5i6PBB1}
+            authorization-grant-type: authorization_code
+            scope: openid,profile,email
+            redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
   ai:
     mcp:
       server:
@@ -12,9 +26,6 @@ spring:
         stdio: false
         type: sync
         protocol: streamable
-
-jwt:
-  secret: ${JWT_SECRET:defaultsecretkeydefaultsecretkeydefaultsecretkey}
 
 ---
 
@@ -49,4 +60,5 @@ spring:
     hibernate:
       ddl-auto: validate
     properties:
-      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect

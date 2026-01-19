@@ -11,14 +11,23 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class UserService {
 
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public User getUserById(Long userId) {
+    public User getUserById(String userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
     }
 
-    public UserDTO getUserDTOById(Long userId) {
+    public UserDTO getUserDTOById(String userId) {
         return UserMapper.toUserDTO(getUserById(userId));
+    }
+
+    public User upsertFromIdentityProvider(String userId, String email) {
+        return userRepository.findById(userId).orElseGet(() -> {
+            var user = new User();
+            user.setId(userId);
+            user.setEmail(email);
+            return userRepository.save(user);
+        });
     }
 }

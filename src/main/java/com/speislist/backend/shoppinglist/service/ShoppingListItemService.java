@@ -5,7 +5,6 @@ import com.speislist.backend.shoppinglist.entity.ShoppingListItem;
 import com.speislist.backend.shoppinglist.exception.ShoppingListItemNotFoundException;
 import com.speislist.backend.shoppinglist.repository.ShoppingListItemRepository;
 import com.speislist.backend.shoppinglist.util.ShoppingListMapper;
-import com.speislist.backend.user.UserService;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,14 +16,12 @@ import java.util.function.Consumer;
 @Service
 @RequiredArgsConstructor
 public class ShoppingListItemService {
-    private final UserService userService;
     private final ShoppingListItemRepository shoppingListItemRepository;
     private final ShoppingListService shoppingListService;
 
     @Transactional
-    public ShoppingListItemDTO createShoppingListItem(long shoppingListId, String name, Integer quantity, long userId) {
-        final var user = userService.getUserDTOById(userId);
-        final var shoppingList = shoppingListService.getShoppingEntityListById(shoppingListId, user.getId());
+    public ShoppingListItemDTO createShoppingListItem(long shoppingListId, String name, Integer quantity, String userId) {
+        final var shoppingList = shoppingListService.getShoppingEntityListById(shoppingListId, userId);
         final var item = new ShoppingListItem();
         item.setName(name);
         item.setQuantity(quantity);
@@ -34,9 +31,8 @@ public class ShoppingListItemService {
     }
 
     @Transactional
-    public List<ShoppingListItemDTO> getShoppingListItems(long shoppingListId, long userId) {
-        final var user = userService.getUserDTOById(userId);
-        return shoppingListService.getShoppingListById(shoppingListId, user.getId()).getItems();
+    public List<ShoppingListItemDTO> getShoppingListItems(long shoppingListId, String userId) {
+        return shoppingListService.getShoppingListById(shoppingListId, userId).getItems();
     }
 
     private ShoppingListItem getShoppingListItemEntityById(Long id) {
@@ -50,7 +46,7 @@ public class ShoppingListItemService {
         return ShoppingListMapper.toShoppingListItemDTO(shoppingListItem);
     }
 
-    private ShoppingListItemDTO performUpdateShoppingListItem(long shoppingListId, long id, long userId, Consumer<ShoppingListItem> changer) {
+    private ShoppingListItemDTO performUpdateShoppingListItem(long shoppingListId, long id, String userId, Consumer<ShoppingListItem> changer) {
         final var item = getShoppingListItemEntityById(id);
         validateItemBelongsToShoppingList(item, shoppingListId);
         shoppingListService.validateUserCanAccessShoppingList(item.getShoppingList(), userId);
@@ -59,7 +55,7 @@ public class ShoppingListItemService {
     }
 
     @Transactional
-    public ShoppingListItemDTO updateShoppingListItem(long shoppingListId, long id, String name, Integer quantity, Boolean isCompleted, long userId) {
+    public ShoppingListItemDTO updateShoppingListItem(long shoppingListId, long id, String name, Integer quantity, Boolean isCompleted, String userId) {
         return performUpdateShoppingListItem(shoppingListId, id, userId, item -> {
             if (name != null) item.setName(name);
             if (quantity != null) item.setQuantity(quantity);
@@ -71,7 +67,7 @@ public class ShoppingListItemService {
      * null values will overwrite existing values
      */
     @Transactional
-    public ShoppingListItemDTO replaceShoppingListItem(long shoppingListId, long id, @NotNull String name, Integer quantity, Boolean isCompleted, long userId) {
+    public ShoppingListItemDTO replaceShoppingListItem(long shoppingListId, long id, @NotNull String name, Integer quantity, Boolean isCompleted, String userId) {
         return performUpdateShoppingListItem(shoppingListId, id, userId, item -> {
             item.setName(name);
             item.setQuantity(quantity);
@@ -80,7 +76,7 @@ public class ShoppingListItemService {
     }
 
     @Transactional
-    public void deleteShoppingListItem(long shoppingListId, long id, long userId) {
+    public void deleteShoppingListItem(long shoppingListId, long id, String userId) {
         final var shoppingListItem = getShoppingListItemEntityById(id);
         validateItemBelongsToShoppingList(shoppingListItem, shoppingListId);
         shoppingListService.validateUserCanAccessShoppingList(shoppingListItem.getShoppingList(), userId);

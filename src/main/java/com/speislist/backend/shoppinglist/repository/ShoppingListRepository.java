@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface ShoppingListRepository extends JpaRepository<ShoppingList, Long> {
     @Query("SELECT sl FROM ShoppingList sl JOIN sl.userShoppingLists usl WHERE usl.user.id = :userId")
-    List<ShoppingList> findByUserId(@Param("userId") Long userId);
+    List<ShoppingList> findByUserId(@Param("userId") String userId);
 }
