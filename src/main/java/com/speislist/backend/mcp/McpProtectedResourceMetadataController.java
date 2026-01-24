@@ -1,8 +1,6 @@
 package com.speislist.backend.mcp;
 
-import java.util.List;
-import java.util.Map;
-
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,7 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping(McpProtectedResourceMetadataController.WELL_KNOWN_BASE)
@@ -18,7 +17,6 @@ public class McpProtectedResourceMetadataController {
 
     public static final String MCP_RESOURCE_PATH = "/mcp";
     public static final String WELL_KNOWN_BASE = "/.well-known/oauth-protected-resource";
-    public static final String METADATA_ENDPOINT = WELL_KNOWN_BASE + MCP_RESOURCE_PATH;
 
     private final String issuerUri;
 

@@ -30,12 +30,6 @@ spring:
         type: sync
         protocol: streamable
 
-# check if this is needed
-speislist:
-  mcp:
-    scope: speislist.mcp
-    audience: ${SPEISLIST_MCP_AUDIENCE:${KEYCLOAK_CLIENT_ID:speislist-backend}}
-
 ---
 spring:
   config:
