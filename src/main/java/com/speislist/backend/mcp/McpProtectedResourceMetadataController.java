@@ -31,8 +31,8 @@ public class McpProtectedResourceMetadataController {
     public Map<String, Object> metadata(@NonNull HttpServletRequest request) {
         return Map.of(
                 "resource", resourceUri(request),
-                "authorization_servers", List.of(issuerUri)
-        );
+                "authorization_servers", List.of(issuerUri),
+                "scopes_supported", List.of("openid", "profile", "email"));
     }
 
     private String resourceUri(@NonNull HttpServletRequest request) {

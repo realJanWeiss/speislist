@@ -24,8 +24,7 @@ public class SecurityConfiguration {
     @Bean
     @Order(0)
     public SecurityFilterChain wellKnownSecurity(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/.well-known/oauth-protected-resource")
+        http.securityMatcher("/.well-known/oauth-protected-resource")
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
@@ -39,20 +38,15 @@ public class SecurityConfiguration {
     @Bean
     @Order(1)
     public SecurityFilterChain mcpSecurity(HttpSecurity http) throws Exception {
-        http
-                .securityMatcher("/mcp/**")
+        http.securityMatcher("/mcp/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(Customizer.withDefaults())
-                )
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .oauth2Login(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
-                .exceptionHandling(ex ->
-                        ex.authenticationEntryPoint(new McpAuthenticationEntryPoint())
-                );
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(new McpAuthenticationEntryPoint()));
 
         return http.build();
     }
@@ -60,9 +54,7 @@ public class SecurityConfiguration {
     @Bean
     @Order(2)
     public SecurityFilterChain defaultSecurity(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults());
+        http.csrf(AbstractHttpConfigurer::disable).cors(Customizer.withDefaults());
 
         return http.build();
     }

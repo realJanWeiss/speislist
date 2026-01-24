@@ -52,8 +52,7 @@ public class ShoppingListService {
     }
 
     ShoppingList getShoppingEntityListById(long id) {
-        return shoppingListRepository.findById(id)
-                .orElseThrow(() -> new ShoppingListNotFoundException(id));
+        return shoppingListRepository.findById(id).orElseThrow(() -> new ShoppingListNotFoundException(id));
     }
 
     /**

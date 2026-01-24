@@ -2,6 +2,8 @@ package com.speislist.backend;
 
 import com.speislist.backend.security.JwtUserService;
 import com.speislist.backend.shoppinglist.dto.response.ShoppingListDTO;
+import com.speislist.backend.shoppinglist.dto.response.ShoppingListItemDTO;
+import com.speislist.backend.shoppinglist.service.ShoppingListItemService;
 import com.speislist.backend.shoppinglist.service.ShoppingListService;
 import lombok.RequiredArgsConstructor;
 import org.springaicommunity.mcp.annotation.McpTool;
@@ -16,6 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SpeislistTools {
     private final ShoppingListService shoppingListService;
+    private final ShoppingListItemService shoppingListItemService;
     private final JwtUserService jwtUserService;
 
     @McpTool(name = "get-lists", description = "Retrieves all lists for the user.")
@@ -25,14 +28,29 @@ public class SpeislistTools {
     }
 
     @McpTool(name = "create-list", description = "Creates a new list for the user.")
-    public ShoppingListDTO createShoppingList(@McpToolParam(description = "Name for the shopping list", required = true) String name) {
+    public ShoppingListDTO createShoppingList(
+            @McpToolParam(description = "Name for the list", required = true) String name) {
         final var currentUser = jwtUserService.getCurrentUser();
         return shoppingListService.createShoppingList(name, currentUser.userId(), currentUser.email());
     }
 
-    @McpTool(name = "get-list", description = "Retrieves the current list items.")
-    public ShoppingListDTO getShoppingList(@McpToolParam(description = "Id of the shopping list", required = true) Integer id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return shoppingListService.getShoppingListById(id, authentication.getName());
+    @McpTool(name = "add-item", description = "Adds an item to a list.")
+    public ShoppingListItemDTO addItemToList(
+            @McpToolParam(description = "Id of the list", required = true) Long listId,
+            @McpToolParam(description = "Name of the item to add", required = true) String itemName,
+            @McpToolParam(description = "Quantity of the item", required = false) Integer quantity) {
+        final var currentUser = jwtUserService.getCurrentUser();
+        return shoppingListItemService.createShoppingListItem(listId, itemName, quantity, currentUser.userId());
+    }
+
+    @McpTool(name = "update-item", description = "Updates an item in a list.")
+    public ShoppingListItemDTO updateItemInList(
+            @McpToolParam(description = "Id of the list", required = true) Long listId,
+            @McpToolParam(description = "Id of the item to update", required = true) Long itemId,
+            @McpToolParam(description = "New name of the item", required = false) String itemName,
+            @McpToolParam(description = "New quantity of the item", required = false) Integer quantity,
+            @McpToolParam(description = "Is the item completed", required = false) Boolean isCompleted) {
+        final var currentUser = jwtUserService.getCurrentUser();
+        return shoppingListItemService.updateShoppingListItem(listId, itemId, itemName, quantity, isCompleted, currentUser.userId());
     }
 }
