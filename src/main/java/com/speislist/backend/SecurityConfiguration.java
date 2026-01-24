@@ -43,7 +43,7 @@ public class SecurityConfiguration {
                 .securityMatcher("/mcp/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(Customizer.withDefaults())  // or .opaqueToken() if using opaque tokens
+                        .jwt(Customizer.withDefaults())
                 )
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .csrf(AbstractHttpConfigurer::disable)
