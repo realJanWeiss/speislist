@@ -17,6 +17,9 @@ spring:
             authorization-grant-type: authorization_code
             scope: openid,profile,email
             redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8081/realms/myrealm}
   ai:
     mcp:
       server:
@@ -27,8 +30,13 @@ spring:
         type: sync
         protocol: streamable
 
----
+# check if this is needed
+speislist:
+  mcp:
+    scope: speislist.mcp
+    audience: ${SPEISLIST_MCP_AUDIENCE:${KEYCLOAK_CLIENT_ID:speislist-backend}}
 
+---
 spring:
   config:
     activate:
@@ -45,9 +53,7 @@ spring:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
-
 ---
-
 spring:
   config:
     activate:
@@ -55,7 +61,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/my_database
     username: postgres
-    password: my_password
+    password: ${PROD_DB_PASSWORD:}
   jpa:
     hibernate:
       ddl-auto: validate
