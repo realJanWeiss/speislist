@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class JwtUserService {
     public JwtUser getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final var authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!(authentication.getPrincipal() instanceof Jwt jwt)) {
             throw new IllegalStateException("No authenticated user found");
