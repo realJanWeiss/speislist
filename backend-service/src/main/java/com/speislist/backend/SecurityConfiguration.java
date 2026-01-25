@@ -38,6 +38,21 @@ public class SecurityConfiguration {
 
     @Bean
     @Order(1)
+    public SecurityFilterChain apiSecurity(HttpSecurity http) throws Exception {
+        http.securityMatcher("/api/**")
+                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(Customizer.withDefaults())
+                .oauth2Login(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable);
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(2)
     public SecurityFilterChain mcpSecurity(HttpSecurity http) throws Exception {
         http.securityMatcher("/mcp/**")
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
@@ -53,7 +68,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    @Order(2)
+    @Order(3)
     public SecurityFilterChain defaultSecurity(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
