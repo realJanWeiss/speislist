@@ -5,6 +5,7 @@ import com.speislist.backend.user.entity.User;
 import com.speislist.backend.user.exception.UserNotFoundException;
 import com.speislist.backend.user.util.UserMapper;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,8 +15,16 @@ public class UserService {
     private final UserRepository userRepository;
 
     public User getUserById(String userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        return userRepository
+                .findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(UserNotFoundException.UserReferenceType.ID, userId));
+    }
+
+    public User getUserByUserName(String userName) {
+        return userRepository
+                .findUserByUserName(userName)
+                .orElseThrow(
+                        () -> new UserNotFoundException(UserNotFoundException.UserReferenceType.USERNAME, userName));
     }
 
     public UserDTO getUserDTOById(String userId) {

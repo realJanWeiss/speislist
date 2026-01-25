@@ -27,12 +27,10 @@ public class ShoppingListService {
     private final UserShoppingListRepository userShoppingListRepository;
 
     @Transactional
-    public ShoppingListDTO createShoppingList(String name, String userId, String userName) {
-        final var user = userService.upsertFromIdentityProvider(userId, userName);
-
+    public ShoppingListDTO createShoppingList(String name, String userId) {
+        final var user = userService.getUserById(userId);
         var shoppingList = new ShoppingList();
         shoppingList.setName(name);
-        shoppingList.setCreatedAt(LocalDateTime.now());
 
         final var userShoppingList = new UserShoppingList();
         userShoppingList.setId(new UserShoppingListId(user.getId(), shoppingList.getId()));
@@ -84,8 +82,9 @@ public class ShoppingListService {
     }
 
     @Transactional
-    public ShoppingListDTO addUserToShoppingList(long shoppingListId, @NotNull User user, String requestingUserId) {
+    public ShoppingListDTO addUserToShoppingList(long shoppingListId, @NotNull String userName, String requestingUserId) {
         final var shoppingList = getShoppingEntityListById(shoppingListId, requestingUserId);
+        final var user = userService.getUserByUserName(userName);
         final var id = new UserShoppingListId(user.getId(), shoppingListId);
         if (userShoppingListRepository.existsById(id)) {
             return ShoppingListMapper.toShoppingListDTO(shoppingList); // already added

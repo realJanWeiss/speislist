@@ -8,8 +8,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
@@ -23,7 +24,8 @@ public class ShoppingList {
 
     private String name;
 
-    private LocalDateTime createdAt;
+    @CreationTimestamp
+    private Instant createdAt;
 
     @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.PERSIST)
     private Set<UserShoppingList> userShoppingLists;

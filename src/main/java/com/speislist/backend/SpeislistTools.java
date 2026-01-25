@@ -5,6 +5,7 @@ import com.speislist.backend.shoppinglist.dto.response.ShoppingListDTO;
 import com.speislist.backend.shoppinglist.dto.response.ShoppingListItemDTO;
 import com.speislist.backend.shoppinglist.service.ShoppingListItemService;
 import com.speislist.backend.shoppinglist.service.ShoppingListService;
+import com.speislist.backend.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springaicommunity.mcp.annotation.McpTool;
 import org.springaicommunity.mcp.annotation.McpToolParam;
@@ -17,6 +18,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class SpeislistTools {
+    private final UserService userService;
     private final ShoppingListService shoppingListService;
     private final ShoppingListItemService shoppingListItemService;
     private final JwtUserService jwtUserService;
@@ -31,7 +33,7 @@ public class SpeislistTools {
     public ShoppingListDTO createShoppingList(
             @McpToolParam(description = "Name for the list", required = true) String name) {
         final var currentUser = jwtUserService.getCurrentUser();
-        return shoppingListService.createShoppingList(name, currentUser.userId(), currentUser.userName());
+        return shoppingListService.createShoppingList(name, currentUser.userId());
     }
 
     @McpTool(name = "add-item", description = "Adds an item to a list.")
@@ -53,6 +55,14 @@ public class SpeislistTools {
         final var currentUser = jwtUserService.getCurrentUser();
         return shoppingListItemService.updateShoppingListItem(
                 listId, itemId, itemName, quantity, isCompleted, currentUser.userId());
+    }
+
+    @McpTool(name = "invite-user", description = "Invites a user to a list.")
+    public ShoppingListDTO inviteUserToList(
+            @McpToolParam(description = "Id of the list", required = true) Long listId,
+            @McpToolParam(description = "User name of the user to invite", required = true) String userName) {
+        final var currentUser = jwtUserService.getCurrentUser();
+        return shoppingListService.addUserToShoppingList(listId, userName, currentUser.userId());
     }
 
     @McpTool(name = "leave-or-delete-list", description = "Removes the current user from a list. If the user is the last member, the list is deleted.")
