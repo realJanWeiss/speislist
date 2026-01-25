@@ -31,7 +31,7 @@ public class SpeislistTools {
     public ShoppingListDTO createShoppingList(
             @McpToolParam(description = "Name for the list", required = true) String name) {
         final var currentUser = jwtUserService.getCurrentUser();
-        return shoppingListService.createShoppingList(name, currentUser.userId(), currentUser.email());
+        return shoppingListService.createShoppingList(name, currentUser.userId(), currentUser.userName());
     }
 
     @McpTool(name = "add-item", description = "Adds an item to a list.")

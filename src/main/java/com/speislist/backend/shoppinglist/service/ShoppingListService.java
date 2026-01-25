@@ -27,8 +27,8 @@ public class ShoppingListService {
     private final UserShoppingListRepository userShoppingListRepository;
 
     @Transactional
-    public ShoppingListDTO createShoppingList(String name, String userId, String email) {
-        final var user = userService.upsertFromIdentityProvider(userId, email);
+    public ShoppingListDTO createShoppingList(String name, String userId, String userName) {
+        final var user = userService.upsertFromIdentityProvider(userId, userName);
 
         var shoppingList = new ShoppingList();
         shoppingList.setName(name);

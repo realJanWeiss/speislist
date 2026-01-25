@@ -26,7 +26,7 @@ public class ShoppingListController {
     @SecuredOperation(summary = "Create a shopping list")
     @ApiResponse(responseCode = "201", description = "Shopping list created successfully")
     public ResponseEntity<ShoppingListDTO> createShoppingList(@Valid @RequestBody CreateShoppingListRequest request, @AuthenticationPrincipal OidcUser oidcUser) {
-        final var shoppingList = shoppingListService.createShoppingList(request.getName(), oidcUser.getSubject(), oidcUser.getEmail());
+        final var shoppingList = shoppingListService.createShoppingList(request.getName(), oidcUser.getSubject(), oidcUser.getPreferredUsername());
         return ResponseEntity.status(HttpStatus.CREATED).body(shoppingList);
     }
 

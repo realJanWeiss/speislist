@@ -22,11 +22,11 @@ public class UserService {
         return UserMapper.toUserDTO(getUserById(userId));
     }
 
-    public User upsertFromIdentityProvider(String userId, String email) {
+    public User upsertFromIdentityProvider(String userId, String userName) {
         return userRepository.findById(userId).orElseGet(() -> {
             var user = new User();
             user.setId(userId);
-            user.setEmail(email);
+            user.setUserName(userName);
             return userRepository.save(user);
         });
     }

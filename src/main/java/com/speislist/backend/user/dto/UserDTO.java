@@ -1,6 +1,5 @@
 package com.speislist.backend.user.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -11,6 +10,5 @@ public class UserDTO {
     private String id;
 
     @NotEmpty
-    @Email
-    private String email;
+    private String userName;
 }

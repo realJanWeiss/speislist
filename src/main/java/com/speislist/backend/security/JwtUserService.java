@@ -16,6 +16,7 @@ public class JwtUserService {
 
         return new JwtUser(
             jwt.getSubject(),
+            jwt.getClaim("preferred_username"),
             jwt.getClaim("email"),
             jwt.getClaim("given_name"),
             jwt.getClaim("family_name")

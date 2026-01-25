@@ -8,7 +8,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Email;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,8 +22,7 @@ public class User {
     private String id;
 
     @Column(unique = true, nullable = false)
-    @Email
-    private String email;
+    private String userName;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonIgnore
