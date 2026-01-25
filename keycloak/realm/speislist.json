@@ -1,0 +1,42 @@
+{
+  "realm": "speislist",
+  "enabled": true,
+
+  "registrationAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+
+  "clients": [
+    {
+      "clientId": "backend-service",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "redirectUris": [
+        "http://localhost:8080/*"
+      ],
+      "webOrigins": [
+        "+"
+      ],
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true
+    },
+    {
+      "clientId": "mcp",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "redirectUris": [
+        "http://localhost:6274/oauth/callback",
+        "https://vscode.dev/redirect",
+        "http://127.0.0.1:33418/",
+        "http://localhost:6274/oauth/callback/debug"
+      ],
+      "webOrigins": [
+          "+"
+      ],
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true
+    }
+  ]
+}
