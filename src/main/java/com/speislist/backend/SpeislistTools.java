@@ -51,6 +51,13 @@ public class SpeislistTools {
             @McpToolParam(description = "New quantity of the item", required = false) Integer quantity,
             @McpToolParam(description = "Is the item completed", required = false) Boolean isCompleted) {
         final var currentUser = jwtUserService.getCurrentUser();
-        return shoppingListItemService.updateShoppingListItem(listId, itemId, itemName, quantity, isCompleted, currentUser.userId());
+        return shoppingListItemService.updateShoppingListItem(
+                listId, itemId, itemName, quantity, isCompleted, currentUser.userId());
+    }
+
+    @McpTool(name = "leave-or-delete-list", description = "Removes the current user from a list. If the user is the last member, the list is deleted.")
+    public void leaveList(@McpToolParam(description = "Id of the list", required = true) Long listId) {
+        final var currentUser = jwtUserService.getCurrentUser();
+        shoppingListService.leaveShoppingList(listId, currentUser.userId());
     }
 }
