@@ -1,4 +1,4 @@
-package com.speislist.backend;
+package com.speislist.backend.mcp;
 
 import com.speislist.backend.security.JwtUserService;
 import com.speislist.backend.shoppinglist.dto.response.ShoppingListDTO;
@@ -47,14 +47,20 @@ public class SpeislistTools {
 
     @McpTool(name = "update-item", description = "Updates an item in a list.")
     public ShoppingListItemDTO updateItemInList(
-            @McpToolParam(description = "Id of the list", required = true) Long listId,
             @McpToolParam(description = "Id of the item to update", required = true) Long itemId,
             @McpToolParam(description = "New name of the item", required = false) String itemName,
             @McpToolParam(description = "New quantity of the item", required = false) Integer quantity,
             @McpToolParam(description = "Is the item completed", required = false) Boolean isCompleted) {
         final var currentUser = jwtUserService.getCurrentUser();
         return shoppingListItemService.updateShoppingListItem(
-                listId, itemId, itemName, quantity, isCompleted, currentUser.userId());
+                itemId, itemName, quantity, isCompleted, currentUser.userId());
+    }
+
+    @McpTool(name = "remove-items", description = "Removes items from a list.")
+    public void removeItemFromList(
+            @McpToolParam(description = "Id of the item to remove", required = true) List<Long> itemIds) {
+        final var currentUser = jwtUserService.getCurrentUser();
+        shoppingListItemService.deleteShoppingListItems(itemIds, currentUser.userId());
     }
 
     @McpTool(name = "invite-user", description = "Invites a user to a list.")

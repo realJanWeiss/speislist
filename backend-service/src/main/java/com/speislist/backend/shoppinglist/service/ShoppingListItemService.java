@@ -35,28 +35,27 @@ public class ShoppingListItemService {
         return shoppingListService.getShoppingListById(shoppingListId, userId).getItems();
     }
 
-    private ShoppingListItem getShoppingListItemEntityById(Long id) {
+    private ShoppingListItem getShoppingListItemEntityById(long id) {
         return shoppingListItemRepository.findById(id)
                 .orElseThrow(() -> new ShoppingListItemNotFoundException(id));
     }
 
-    public ShoppingListItemDTO getShoppingListItemById(long shoppingListId, long id) {
+    public ShoppingListItemDTO getShoppingListItemById(long id, String userId) {
         final var shoppingListItem = getShoppingListItemEntityById(id);
-        validateItemBelongsToShoppingList(shoppingListItem, shoppingListId);
+        shoppingListService.validateUserCanAccessShoppingList(shoppingListItem.getShoppingList(), userId);
         return ShoppingListMapper.toShoppingListItemDTO(shoppingListItem);
     }
 
-    private ShoppingListItemDTO performUpdateShoppingListItem(long shoppingListId, long id, String userId, Consumer<ShoppingListItem> changer) {
+    private ShoppingListItemDTO performUpdateShoppingListItem(long id, String userId, Consumer<ShoppingListItem> changer) {
         final var item = getShoppingListItemEntityById(id);
-        validateItemBelongsToShoppingList(item, shoppingListId);
         shoppingListService.validateUserCanAccessShoppingList(item.getShoppingList(), userId);
         changer.accept(item);
         return ShoppingListMapper.toShoppingListItemDTO(shoppingListItemRepository.save(item));
     }
 
     @Transactional
-    public ShoppingListItemDTO updateShoppingListItem(long shoppingListId, long id, String name, Integer quantity, Boolean isCompleted, String userId) {
-        return performUpdateShoppingListItem(shoppingListId, id, userId, item -> {
+    public ShoppingListItemDTO updateShoppingListItem(long id, String name, Integer quantity, Boolean isCompleted, String userId) {
+        return performUpdateShoppingListItem(id, userId, item -> {
             if (name != null) item.setName(name);
             if (quantity != null) item.setQuantity(quantity);
             if (isCompleted != null) item.setIsCompleted(isCompleted);
@@ -67,8 +66,8 @@ public class ShoppingListItemService {
      * null values will overwrite existing values
      */
     @Transactional
-    public ShoppingListItemDTO replaceShoppingListItem(long shoppingListId, long id, @NotNull String name, Integer quantity, Boolean isCompleted, String userId) {
-        return performUpdateShoppingListItem(shoppingListId, id, userId, item -> {
+    public ShoppingListItemDTO replaceShoppingListItem(long id, @NotNull String name, Integer quantity, Boolean isCompleted, String userId) {
+        return performUpdateShoppingListItem(id, userId, item -> {
             item.setName(name);
             item.setQuantity(quantity);
             item.setIsCompleted(isCompleted);
@@ -76,11 +75,17 @@ public class ShoppingListItemService {
     }
 
     @Transactional
-    public void deleteShoppingListItem(long shoppingListId, long id, String userId) {
+    public void deleteShoppingListItem(long id, String userId) {
         final var shoppingListItem = getShoppingListItemEntityById(id);
-        validateItemBelongsToShoppingList(shoppingListItem, shoppingListId);
         shoppingListService.validateUserCanAccessShoppingList(shoppingListItem.getShoppingList(), userId);
-        shoppingListItemRepository.deleteById(id);
+        shoppingListItemRepository.delete(shoppingListItem);
+    }
+
+    @Transactional
+    public void deleteShoppingListItems(List<Long> ids, String userId) {
+        final var shoppingListItems = shoppingListItemRepository.findByIdIn(ids);
+        shoppingListItems.forEach(item -> shoppingListService.validateUserCanAccessShoppingList(item.getShoppingList(), userId));
+        shoppingListItemRepository.deleteByIdIn(ids);
     }
 
     private void validateItemBelongsToShoppingList(ShoppingListItem item, long shoppingListId) {

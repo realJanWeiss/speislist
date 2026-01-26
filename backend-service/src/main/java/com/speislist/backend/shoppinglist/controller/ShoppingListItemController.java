@@ -49,30 +49,30 @@ public class ShoppingListItemController {
 
     @GetMapping("/{id}")
     @SecuredOperation(summary = "Get a shopping list item by ID")
-    public ResponseEntity<ShoppingListItemDTO> getShoppingListItem(@PathVariable Long shoppingListId, @PathVariable Long id) {
-        final var item = shoppingListItemService.getShoppingListItemById(shoppingListId, id);
+    public ResponseEntity<ShoppingListItemDTO> getShoppingListItem(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        final var item = shoppingListItemService.getShoppingListItemById(id, jwt.getSubject());
         return ResponseEntity.ok(item);
     }
 
     @PatchMapping("/{id}")
     @SecuredOperation(summary = "Update a shopping list item")
-    public ResponseEntity<ShoppingListItemDTO> patchShoppingListItem(@PathVariable Long shoppingListId, @PathVariable Long id, @Valid @RequestBody UpdateShoppingListItemRequest request, @AuthenticationPrincipal Jwt jwt) {
-        final var item = shoppingListItemService.updateShoppingListItem(shoppingListId, id, request.getName(), request.getQuantity(), request.getIsCompleted(), jwt.getSubject());
+    public ResponseEntity<ShoppingListItemDTO> patchShoppingListItem(@PathVariable Long id, @Valid @RequestBody UpdateShoppingListItemRequest request, @AuthenticationPrincipal Jwt jwt) {
+        final var item = shoppingListItemService.updateShoppingListItem(id, request.getName(), request.getQuantity(), request.getIsCompleted(), jwt.getSubject());
         return ResponseEntity.ok(item);
     }
 
     @PutMapping("/{id}")
     @SecuredOperation(summary = "Update a shopping list item")
-    public ResponseEntity<ShoppingListItemDTO> putShoppingListItem(@PathVariable Long shoppingListId, @PathVariable Long id, @Valid @RequestBody ReplaceShoppingListItemRequest request, @AuthenticationPrincipal Jwt jwt) {
-        final var item = shoppingListItemService.replaceShoppingListItem(shoppingListId, id, request.getName(), request.getQuantity(), request.getIsCompleted(), jwt.getSubject());
+    public ResponseEntity<ShoppingListItemDTO> putShoppingListItem(@PathVariable Long id, @Valid @RequestBody ReplaceShoppingListItemRequest request, @AuthenticationPrincipal Jwt jwt) {
+        final var item = shoppingListItemService.replaceShoppingListItem(id, request.getName(), request.getQuantity(), request.getIsCompleted(), jwt.getSubject());
         return ResponseEntity.ok(item);
     }
 
     @DeleteMapping("/{id}")
     @SecuredOperation(summary = "Delete a shopping list item")
     @ApiResponse(responseCode = "204", description = "Shopping list item deleted successfully")
-    public ResponseEntity<Void> deleteShoppingListItem(@PathVariable Long shoppingListId, @PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
-        shoppingListItemService.deleteShoppingListItem(shoppingListId, id, jwt.getSubject());
+    public ResponseEntity<Void> deleteShoppingListItem(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+        shoppingListItemService.deleteShoppingListItem(id, jwt.getSubject());
         return ResponseEntity.noContent().build();
     }
 }
