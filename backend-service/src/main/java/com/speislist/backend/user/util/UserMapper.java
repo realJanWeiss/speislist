@@ -1,16 +1,16 @@
 package com.speislist.backend.user.util;
 
-import com.speislist.backend.user.entity.User;
 import com.speislist.backend.user.dto.UserDTO;
+import com.speislist.backend.user.entity.User;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class UserMapper {
 
-    private UserMapper() {}
-
     public static UserDTO toUserDTO(User user) {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-        userDTO.setUserName(user.getUserName());
-        return userDTO;
+        return UserDTO.builder()
+                .id(user.getId())
+                .userName(user.getUserName())
+                .build();
     }
 }

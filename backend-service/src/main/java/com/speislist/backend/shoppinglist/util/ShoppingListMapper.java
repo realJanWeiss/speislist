@@ -13,30 +13,29 @@ import java.util.List;
 public class ShoppingListMapper {
 
     public static ShoppingListDTO toShoppingListDTO(ShoppingList shoppingList) {
-        final var shoppingListDTO = new ShoppingListDTO();
-        shoppingListDTO.setId(shoppingList.getId());
-        shoppingListDTO.setName(shoppingList.getName());
-        shoppingListDTO.setCreatedAt(shoppingList.getCreatedAt());
-        shoppingListDTO.setItems(shoppingList.getItems() != null
-                ? shoppingList.getItems().stream()
-                .map(ShoppingListMapper::toShoppingListItemDTO)
-                .toList()
-                : List.of());
-        shoppingListDTO.setMembers(shoppingList.getUserShoppingLists() != null
-                ? shoppingList.getUserShoppingLists().stream()
-                .map(userShoppingList -> UserMapper.toUserDTO(userShoppingList.getUser()))
-                .toList()
-                : List.of()
-        );
-        return shoppingListDTO;
+        return ShoppingListDTO.builder()
+                .id(shoppingList.getId())
+                .name(shoppingList.getName())
+                .createdAt(shoppingList.getCreatedAt())
+                .items(shoppingList.getItems() != null
+                        ? shoppingList.getItems().stream()
+                                .map(ShoppingListMapper::toShoppingListItemDTO)
+                                .toList()
+                        : List.of())
+                .members(shoppingList.getUserShoppingLists() != null
+                        ? shoppingList.getUserShoppingLists().stream()
+                                .map(userShoppingList -> UserMapper.toUserDTO(userShoppingList.getUser()))
+                                .toList()
+                        : List.of())
+                .build();
     }
 
     public static ShoppingListItemDTO toShoppingListItemDTO(ShoppingListItem shoppingListItem) {
-        final var shoppingListItemDTO = new ShoppingListItemDTO();
-        shoppingListItemDTO.setId(shoppingListItem.getId());
-        shoppingListItemDTO.setName(shoppingListItem.getName());
-        shoppingListItemDTO.setQuantity(shoppingListItem.getQuantity());
-        shoppingListItemDTO.setIsCompleted(shoppingListItem.getIsCompleted());
-        return shoppingListItemDTO;
+        return ShoppingListItemDTO.builder()
+                .id(shoppingListItem.getId())
+                .name(shoppingListItem.getName())
+                .quantity(shoppingListItem.getQuantity())
+                .isCompleted(shoppingListItem.getIsCompleted())
+                .build();
     }
 }

@@ -1,12 +1,14 @@
 package com.speislist.backend.shoppinglist.dto.response;
 
 import com.speislist.backend.user.dto.UserDTO;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.Instant;
 import java.util.List;
 
 @Data
+@Builder
 public class ShoppingListDTO {
     private Long id;
     private String name;

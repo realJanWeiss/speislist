@@ -5,7 +5,6 @@ import com.speislist.backend.user.entity.User;
 import com.speislist.backend.user.exception.UserNotFoundException;
 import com.speislist.backend.user.util.UserMapper;
 import lombok.AllArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
