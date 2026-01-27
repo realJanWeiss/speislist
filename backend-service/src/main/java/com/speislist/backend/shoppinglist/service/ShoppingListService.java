@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -49,41 +48,29 @@ public class ShoppingListService {
                 .toList();
     }
 
-    ShoppingList getShoppingEntityListById(long id) {
-        return shoppingListRepository.findById(id).orElseThrow(() -> new ShoppingListNotFoundException(id));
-    }
-
-    /**
-     * Get ShoppingList and validate user is a member of the shopping list
-     */
-    ShoppingList getShoppingEntityListById(long id, String userId) {
-        final var shoppingList = getShoppingEntityListById(id);
-        validateUserCanAccessShoppingList(shoppingList, userId);
-        return shoppingList;
-    }
-
     @Transactional
     public ShoppingListDTO getShoppingListById(long id, String userId) {
-        final var shoppingList = getShoppingEntityListById(id, userId);
+        final var shoppingList = getShoppingListEntityById(id, userId);
         return ShoppingListMapper.toShoppingListDTO(shoppingList);
     }
 
     @Transactional
     public ShoppingListDTO updateShoppingList(long id, String name, String userId) {
-        final var shoppingList = getShoppingEntityListById(id, userId);
+        final var shoppingList = getShoppingListEntityById(id, userId);
         shoppingList.setName(name);
-        return ShoppingListMapper.toShoppingListDTO(shoppingListRepository.save(shoppingList));
+        final var updatedShoppingList = shoppingListRepository.save(shoppingList);
+        return ShoppingListMapper.toShoppingListDTO(updatedShoppingList);
     }
 
     @Transactional
     public void deleteShoppingList(long id, String userId) {
-        final var shoppingList = getShoppingEntityListById(id, userId);
+        final var shoppingList = getShoppingListEntityById(id, userId);
         shoppingListRepository.delete(shoppingList);
     }
 
     @Transactional
     public ShoppingListDTO addUserToShoppingList(long shoppingListId, @NotNull String userName, String requestingUserId) {
-        final var shoppingList = getShoppingEntityListById(shoppingListId, requestingUserId);
+        final var shoppingList = getShoppingListEntityById(shoppingListId, requestingUserId);
         final var user = userService.getUserByUserName(userName);
         final var id = new UserShoppingListId(user.getId(), shoppingListId);
         if (userShoppingListRepository.existsById(id)) {
@@ -99,20 +86,33 @@ public class ShoppingListService {
 
     @Transactional
     public void removeUserFromShoppingList(long shoppingListId, @NotNull User user, String requestingUserId) {
-        final var shoppingList = getShoppingEntityListById(shoppingListId, requestingUserId);
+        final var shoppingList = getShoppingListEntityById(shoppingListId, requestingUserId);
         final var id = new UserShoppingListId(user.getId(), shoppingList.getId());
         userShoppingListRepository.deleteById(id);
     }
 
     @Transactional
     public void leaveShoppingList(long shoppingListId, String userId) {
-        final var shoppingList = getShoppingEntityListById(shoppingListId, userId);
+        final var shoppingList = getShoppingListEntityById(shoppingListId, userId);
         if (shoppingList.getUserShoppingLists().size() == 1) {
             shoppingListRepository.delete(shoppingList);
         } else {
             final var id = new UserShoppingListId(userId, shoppingList.getId());
             userShoppingListRepository.deleteById(id);
         }
+    }
+
+    ShoppingList getShoppingListEntityById(long id) {
+        return shoppingListRepository.findById(id).orElseThrow(() -> new ShoppingListNotFoundException(id));
+    }
+
+    /**
+     * Get ShoppingList and validate user is a member of the shopping list
+     */
+    ShoppingList getShoppingListEntityById(long id, String userId) {
+        final var shoppingList = getShoppingListEntityById(id);
+        validateUserCanAccessShoppingList(shoppingList, userId);
+        return shoppingList;
     }
 
     private boolean isMemberOfShoppingList(@NotNull ShoppingList shoppingList, String userId) {

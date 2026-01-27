@@ -1,8 +1,8 @@
 package com.speislist.backend.shoppinglist.dto.request;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class UpdateShoppingListRequest {
     private String name;
 }

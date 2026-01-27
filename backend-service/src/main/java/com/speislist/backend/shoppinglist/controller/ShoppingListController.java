@@ -1,10 +1,10 @@
 package com.speislist.backend.shoppinglist.controller;
 
 import com.speislist.backend.auth.annotation.SecuredOperation;
-import com.speislist.backend.shoppinglist.dto.response.ShoppingListDTO;
-import com.speislist.backend.shoppinglist.service.ShoppingListService;
 import com.speislist.backend.shoppinglist.dto.request.CreateShoppingListRequest;
 import com.speislist.backend.shoppinglist.dto.request.UpdateShoppingListRequest;
+import com.speislist.backend.shoppinglist.dto.response.ShoppingListDTO;
+import com.speislist.backend.shoppinglist.service.ShoppingListService;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 

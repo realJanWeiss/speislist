@@ -5,13 +5,12 @@ import com.speislist.backend.shoppinglist.dto.response.ShoppingListItemDTO;
 import com.speislist.backend.shoppinglist.entity.ShoppingList;
 import com.speislist.backend.shoppinglist.entity.ShoppingListItem;
 import com.speislist.backend.user.util.UserMapper;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class ShoppingListMapper {
-
-    private ShoppingListMapper() {
-    }
 
     public static ShoppingListDTO toShoppingListDTO(ShoppingList shoppingList) {
         final var shoppingListDTO = new ShoppingListDTO();

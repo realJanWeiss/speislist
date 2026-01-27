@@ -21,7 +21,7 @@ public class ShoppingListItemService {
 
     @Transactional
     public ShoppingListItemDTO createShoppingListItem(long shoppingListId, String name, Integer quantity, String userId) {
-        final var shoppingList = shoppingListService.getShoppingEntityListById(shoppingListId, userId);
+        final var shoppingList = shoppingListService.getShoppingListEntityById(shoppingListId, userId);
         final var item = new ShoppingListItem();
         item.setName(name);
         item.setQuantity(quantity);
@@ -35,22 +35,10 @@ public class ShoppingListItemService {
         return shoppingListService.getShoppingListById(shoppingListId, userId).getItems();
     }
 
-    private ShoppingListItem getShoppingListItemEntityById(long id) {
-        return shoppingListItemRepository.findById(id)
-                .orElseThrow(() -> new ShoppingListItemNotFoundException(id));
-    }
-
     public ShoppingListItemDTO getShoppingListItemById(long id, String userId) {
         final var shoppingListItem = getShoppingListItemEntityById(id);
         shoppingListService.validateUserCanAccessShoppingList(shoppingListItem.getShoppingList(), userId);
         return ShoppingListMapper.toShoppingListItemDTO(shoppingListItem);
-    }
-
-    private ShoppingListItemDTO performUpdateShoppingListItem(long id, String userId, Consumer<ShoppingListItem> changer) {
-        final var item = getShoppingListItemEntityById(id);
-        shoppingListService.validateUserCanAccessShoppingList(item.getShoppingList(), userId);
-        changer.accept(item);
-        return ShoppingListMapper.toShoppingListItemDTO(shoppingListItemRepository.save(item));
     }
 
     @Transactional
@@ -86,6 +74,18 @@ public class ShoppingListItemService {
         final var shoppingListItems = shoppingListItemRepository.findByIdIn(ids);
         shoppingListItems.forEach(item -> shoppingListService.validateUserCanAccessShoppingList(item.getShoppingList(), userId));
         shoppingListItemRepository.deleteByIdIn(ids);
+    }
+
+    private ShoppingListItem getShoppingListItemEntityById(long id) {
+        return shoppingListItemRepository.findById(id)
+                .orElseThrow(() -> new ShoppingListItemNotFoundException(id));
+    }
+
+    private ShoppingListItemDTO performUpdateShoppingListItem(long id, String userId, Consumer<ShoppingListItem> changer) {
+        final var item = getShoppingListItemEntityById(id);
+        shoppingListService.validateUserCanAccessShoppingList(item.getShoppingList(), userId);
+        changer.accept(item);
+        return ShoppingListMapper.toShoppingListItemDTO(shoppingListItemRepository.save(item));
     }
 
     private void validateItemBelongsToShoppingList(ShoppingListItem item, long shoppingListId) {
