@@ -81,6 +81,7 @@ public class ShoppingListService {
         userShoppingList.setUser(user);
         userShoppingList.setShoppingList(shoppingList);
         userShoppingListRepository.save(userShoppingList);
+        shoppingList.getUserShoppingLists().add(userShoppingList);
         return ShoppingListMapper.toShoppingListDTO(shoppingList);
     }
 

@@ -421,5 +421,31 @@ class ShoppingListItemServiceTest {
             verify(shoppingListService).validateUserCanAccessShoppingList(anotherList, "user-123");
             verify(shoppingListItemRepository).deleteByIdIn(ids);
         }
+
+        @Test
+        @DisplayName("should throw exception when some items do not exist")
+        void shouldThrowExceptionWhenSomeItemsDoNotExist() {
+            List<Long> ids = List.of(10L, 999L);
+            // Only one item is found
+            when(shoppingListItemRepository.findByIdIn(ids)).thenReturn(List.of(testItem));
+
+            assertThatThrownBy(() -> shoppingListItemService.deleteShoppingListItems(ids, "user-123"))
+                    .isInstanceOf(ShoppingListItemNotFoundException.class)
+                    .hasMessageContaining("999");
+
+            verify(shoppingListItemRepository, never()).deleteByIdIn(any());
+        }
+
+        @Test
+        @DisplayName("should throw exception when no items exist")
+        void shouldThrowExceptionWhenNoItemsExist() {
+            List<Long> ids = List.of(888L, 999L);
+            when(shoppingListItemRepository.findByIdIn(ids)).thenReturn(List.of());
+
+            assertThatThrownBy(() -> shoppingListItemService.deleteShoppingListItems(ids, "user-123"))
+                    .isInstanceOf(ShoppingListItemNotFoundException.class);
+
+            verify(shoppingListItemRepository, never()).deleteByIdIn(any());
+        }
     }
 }
