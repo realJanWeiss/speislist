@@ -249,18 +249,20 @@ class InventoryServiceTest {
             when(inventoryRepository.findById(1L)).thenReturn(Optional.of(testInventory));
             when(userService.getUserByUserName("newuser")).thenReturn(newUser);
             when(userInventoryRepository.existsById(any(UserInventoryId.class))).thenReturn(false);
-            when(userInventoryRepository.save(any(UserInventory.class)))
+            when(inventoryRepository.save(any(Inventory.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             InventoryDTO result = inventoryService.addUserToInventory(1L, "newuser", "user-123");
 
             assertThat(result).isNotNull();
 
-            ArgumentCaptor<UserInventory> captor = ArgumentCaptor.forClass(UserInventory.class);
-            verify(userInventoryRepository).save(captor.capture());
-            UserInventory saved = captor.getValue();
-            assertThat(saved.getUser().getId()).isEqualTo("new-user-456");
-            assertThat(saved.getInventory().getId()).isEqualTo(1L);
+            ArgumentCaptor<Inventory> captor = ArgumentCaptor.forClass(Inventory.class);
+            verify(inventoryRepository).save(captor.capture());
+            Inventory saved = captor.getValue();
+            assertThat(saved.getUserInventories()).hasSize(2);
+            assertThat(saved.getUserInventories())
+                    .extracting(ui -> ui.getUser().getId())
+                    .contains("new-user-456");
         }
 
         @Test
@@ -273,7 +275,7 @@ class InventoryServiceTest {
             when(inventoryRepository.findById(1L)).thenReturn(Optional.of(testInventory));
             when(userService.getUserByUserName("newuser")).thenReturn(newUser);
             when(userInventoryRepository.existsById(any(UserInventoryId.class))).thenReturn(false);
-            when(userInventoryRepository.save(any(UserInventory.class)))
+            when(inventoryRepository.save(any(Inventory.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             inventoryService.addUserToInventory(1L, "newuser", "user-123");
@@ -294,7 +296,7 @@ class InventoryServiceTest {
 
             inventoryService.addUserToInventory(1L, "testuser", "user-123");
 
-            verify(userInventoryRepository, never()).save(any());
+            verify(inventoryRepository, never()).save(any());
         }
 
         @Test

@@ -81,8 +81,8 @@ public class InventoryService {
         userInventory.setId(id);
         userInventory.setUser(user);
         userInventory.setInventory(inventory);
-        userInventoryRepository.save(userInventory);
         inventory.getUserInventories().add(userInventory);
+        inventoryRepository.save(inventory);
         return InventoryMapper.toInventoryDTO(inventory);
     }
 

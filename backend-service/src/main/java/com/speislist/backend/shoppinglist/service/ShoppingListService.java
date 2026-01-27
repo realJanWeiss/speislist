@@ -69,7 +69,8 @@ public class ShoppingListService {
     }
 
     @Transactional
-    public ShoppingListDTO addUserToShoppingList(long shoppingListId, @NotNull String userName, String requestingUserId) {
+    public ShoppingListDTO addUserToShoppingList(long shoppingListId, @NotNull String userName,
+            String requestingUserId) {
         final var shoppingList = getShoppingListEntityById(shoppingListId, requestingUserId);
         final var user = userService.getUserByUserName(userName);
         final var id = new UserShoppingListId(user.getId(), shoppingListId);
@@ -80,8 +81,8 @@ public class ShoppingListService {
         userShoppingList.setId(id);
         userShoppingList.setUser(user);
         userShoppingList.setShoppingList(shoppingList);
-        userShoppingListRepository.save(userShoppingList);
         shoppingList.getUserShoppingLists().add(userShoppingList);
+        shoppingListRepository.save(shoppingList);
         return ShoppingListMapper.toShoppingListDTO(shoppingList);
     }
 

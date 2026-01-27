@@ -250,7 +250,7 @@ class ShoppingListServiceTest {
             when(shoppingListRepository.findById(1L)).thenReturn(Optional.of(testShoppingList));
             when(userService.getUserByUserName("newuser")).thenReturn(newUser);
             when(userShoppingListRepository.existsById(any(UserShoppingListId.class))).thenReturn(false);
-            when(userShoppingListRepository.save(any(UserShoppingList.class)))
+            when(shoppingListRepository.save(any(ShoppingList.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             ShoppingListDTO result = shoppingListService.addUserToShoppingList(1L, "newuser", "user-123");
@@ -260,11 +260,13 @@ class ShoppingListServiceTest {
             assertThat(result.getMembers()).hasSize(2);
             assertThat(result.getMembers()).extracting("id").contains("new-user-456", "user-123");
 
-            ArgumentCaptor<UserShoppingList> captor = ArgumentCaptor.forClass(UserShoppingList.class);
-            verify(userShoppingListRepository).save(captor.capture());
-            UserShoppingList saved = captor.getValue();
-            assertThat(saved.getUser().getId()).isEqualTo("new-user-456");
-            assertThat(saved.getShoppingList().getId()).isEqualTo(1L);
+            ArgumentCaptor<ShoppingList> captor = ArgumentCaptor.forClass(ShoppingList.class);
+            verify(shoppingListRepository).save(captor.capture());
+            ShoppingList saved = captor.getValue();
+            assertThat(saved.getUserShoppingLists()).hasSize(2);
+            assertThat(saved.getUserShoppingLists())
+                    .extracting(usl -> usl.getUser().getId())
+                    .contains("new-user-456");
         }
 
         @Test
@@ -277,7 +279,7 @@ class ShoppingListServiceTest {
             when(shoppingListRepository.findById(1L)).thenReturn(Optional.of(testShoppingList));
             when(userService.getUserByUserName("newuser")).thenReturn(newUser);
             when(userShoppingListRepository.existsById(any(UserShoppingListId.class))).thenReturn(false);
-            when(userShoppingListRepository.save(any(UserShoppingList.class)))
+            when(shoppingListRepository.save(any(ShoppingList.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             ShoppingListDTO result = shoppingListService.addUserToShoppingList(1L, "newuser", "user-123");
@@ -298,7 +300,7 @@ class ShoppingListServiceTest {
 
             shoppingListService.addUserToShoppingList(1L, "testuser", "user-123");
 
-            verify(userShoppingListRepository, never()).save(any());
+            verify(shoppingListRepository, never()).save(any());
         }
 
         @Test
