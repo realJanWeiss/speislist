@@ -48,9 +48,14 @@ public class InventoryTools {
     public InventoryItemDTO updateItemInInventory(
             @McpToolParam(description = "Id of the item to update", required = true) Long inventoryItemId,
             @McpToolParam(description = "New name of the item", required = false) String inventoryItemName,
-            @McpToolParam(description = "New expiration date of the item", required = false) LocalDate expirationDate) {
+            @McpToolParam(description = "New expiration date of the item", required = false) LocalDate expirationDate,
+            @McpToolParam(description = "Update should behave like a PUT action, where all fields are replaced.", required = false) Boolean putUpdate) {
         final var currentUser = jwtUserService.getCurrentUser();
-        return inventoryItemService.updateInventoryItem(
+        if (putUpdate != null && putUpdate) {
+            return inventoryItemService.putInventoryItem(inventoryItemId, inventoryItemName, expirationDate,
+                    currentUser.userId());
+        }
+        return inventoryItemService.patchInventoryItem(
                 inventoryItemId, inventoryItemName, expirationDate, currentUser.userId());
     }
 

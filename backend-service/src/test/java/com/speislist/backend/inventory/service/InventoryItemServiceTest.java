@@ -141,7 +141,7 @@ class InventoryItemServiceTest {
             when(inventoryItemRepository.save(any(InventoryItem.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
-            InventoryItemDTO result = inventoryItemService.updateInventoryItem(10L, "Updated Name", newExpirationDate,
+            InventoryItemDTO result = inventoryItemService.patchInventoryItem(10L, "Updated Name", newExpirationDate,
                     "user-123");
 
             assertThat(result.getName()).isEqualTo("Updated Name");
@@ -156,7 +156,7 @@ class InventoryItemServiceTest {
             when(inventoryItemRepository.save(any(InventoryItem.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
-            InventoryItemDTO result = inventoryItemService.updateInventoryItem(10L, "New Name", null, "user-123");
+            InventoryItemDTO result = inventoryItemService.patchInventoryItem(10L, "New Name", null, "user-123");
 
             assertThat(result.getName()).isEqualTo("New Name");
             assertThat(result.getExpirationDate()).isEqualTo(LocalDate.of(2026, 2, 15)); // unchanged
@@ -171,7 +171,7 @@ class InventoryItemServiceTest {
             when(inventoryItemRepository.save(any(InventoryItem.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
-            InventoryItemDTO result = inventoryItemService.updateInventoryItem(10L, null, newExpirationDate,
+            InventoryItemDTO result = inventoryItemService.patchInventoryItem(10L, null, newExpirationDate,
                     "user-123");
 
             assertThat(result.getName()).isEqualTo("Milk"); // unchanged
@@ -183,7 +183,7 @@ class InventoryItemServiceTest {
         void shouldThrowExceptionWhenItemNotFound() {
             when(inventoryItemRepository.findById(999L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> inventoryItemService.updateInventoryItem(999L, "Name", null, "user-123"))
+            assertThatThrownBy(() -> inventoryItemService.patchInventoryItem(999L, "Name", null, "user-123"))
                     .isInstanceOf(InventoryItemNotFoundException.class)
                     .hasMessageContaining("999");
         }
@@ -195,7 +195,7 @@ class InventoryItemServiceTest {
             doThrow(new InventoryNotFoundException(1L))
                     .when(inventoryService).validateUserCanAccessInventory(testInventory, "other-user");
 
-            assertThatThrownBy(() -> inventoryItemService.updateInventoryItem(10L, "Name", null, "other-user"))
+            assertThatThrownBy(() -> inventoryItemService.patchInventoryItem(10L, "Name", null, "other-user"))
                     .isInstanceOf(InventoryNotFoundException.class);
         }
     }

@@ -31,12 +31,20 @@ public class InventoryItemService {
     }
 
     @Transactional
-    public InventoryItemDTO updateInventoryItem(long id, String name, LocalDate expirationDate, String userId) {
-        return performUpdateInventoryItem(id, userId, item -> {
+    public InventoryItemDTO patchInventoryItem(long id, String name, LocalDate expirationDate, String userId) {
+        return applyInventoryItemChanges(id, userId, item -> {
             if (name != null)
                 item.setName(name);
             if (expirationDate != null)
                 item.setExpirationDate(expirationDate);
+        });
+    }
+
+    @Transactional
+    public InventoryItemDTO putInventoryItem(long id, String name, LocalDate expirationDate, String userId) {
+        return applyInventoryItemChanges(id, userId, item -> {
+            item.setName(name);
+            item.setExpirationDate(expirationDate);
         });
     }
 
@@ -45,7 +53,7 @@ public class InventoryItemService {
                 .orElseThrow(() -> new InventoryItemNotFoundException(id));
     }
 
-    private InventoryItemDTO performUpdateInventoryItem(long id, String userId, Consumer<InventoryItem> changer) {
+    private InventoryItemDTO applyInventoryItemChanges(long id, String userId, Consumer<InventoryItem> changer) {
         final var item = getInventoryItemEntityById(id);
         inventoryService.validateUserCanAccessInventory(item.getInventory(), userId);
         changer.accept(item);
