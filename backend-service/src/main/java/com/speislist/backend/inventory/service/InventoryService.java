@@ -42,7 +42,7 @@ public class InventoryService {
         return InventoryMapper.toInventoryDTO(inventory);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<InventoryDTO> getInventoriesByUser(String userId) {
         return inventoryRepository.findByUserId(userId).stream()
                 .map(InventoryMapper::toInventoryDTO)
@@ -82,6 +82,7 @@ public class InventoryService {
         userInventory.setUser(user);
         userInventory.setInventory(inventory);
         userInventoryRepository.save(userInventory);
+        inventory.getUserInventories().add(userInventory);
         return InventoryMapper.toInventoryDTO(inventory);
     }
 

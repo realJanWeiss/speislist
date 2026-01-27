@@ -55,6 +55,12 @@ public class InventoryItemService {
     @Transactional
     public void deleteInventoryItems(List<Long> ids, String userId) {
         final var inventoryItems = inventoryItemRepository.findByIdIn(ids);
+        if (inventoryItems.size() != ids.size()) {
+            // Find the missing IDs and throw exception for the first one not found
+            final var foundIds = inventoryItems.stream().map(InventoryItem::getId).toList();
+            final var missingId = ids.stream().filter(id -> !foundIds.contains(id)).findFirst().orElseThrow();
+            throw new InventoryItemNotFoundException(missingId);
+        }
         inventoryItems.forEach(item -> inventoryService.validateUserCanAccessInventory(item.getInventory(), userId));
         inventoryItemRepository.deleteByIdIn(ids);
     }
