@@ -4,6 +4,7 @@ import com.speislist.backend.inventory.dto.response.InventoryDTO;
 import com.speislist.backend.inventory.dto.response.InventoryItemDTO;
 import com.speislist.backend.inventory.entity.Inventory;
 import com.speislist.backend.inventory.entity.InventoryItem;
+import com.speislist.backend.user.util.UserMapper;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
@@ -13,6 +14,12 @@ public class InventoryMapper {
         return InventoryDTO.builder()
                 .id(inventory.getId())
                 .name(inventory.getName())
+                .createdAt(inventory.getCreatedAt())
+                .members(inventory.getUserInventories() != null
+                        ? inventory.getUserInventories().stream()
+                        .map(userInventory -> UserMapper.toUserDTO(userInventory.getUser()))
+                        .toList()
+                        : null)
                 .items(inventory.getItems() != null
                         ? inventory.getItems().stream()
                         .map(InventoryMapper::toInventoryItemDTO).toList()
