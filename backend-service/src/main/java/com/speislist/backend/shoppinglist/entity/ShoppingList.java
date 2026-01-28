@@ -27,9 +27,9 @@ public class ShoppingList {
     @CreationTimestamp
     private Instant createdAt;
 
-    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserShoppingList> userShoppingLists;
 
-    @OneToMany(mappedBy = "shoppingList")
+    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ShoppingListItem> items;
 }

@@ -27,9 +27,9 @@ public class Inventory {
     @CreationTimestamp
     private Instant createdAt;
 
-    @OneToMany(mappedBy = "inventory", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "inventory", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserInventory> userInventories;
 
-    @OneToMany(mappedBy = "inventory")
+    @OneToMany(mappedBy = "inventory", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<InventoryItem> items;
 }
