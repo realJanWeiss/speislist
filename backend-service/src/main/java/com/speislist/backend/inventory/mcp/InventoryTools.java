@@ -24,7 +24,7 @@ public class InventoryTools {
 
     @McpTool(name = "get-inventories", description = "Retrieves all inventories for the user.")
     public List<InventoryDTO> getInventories() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        final var authentication = SecurityContextHolder.getContext().getAuthentication();
         return inventoryService.getInventoriesByUser(authentication.getName());
     }
 
