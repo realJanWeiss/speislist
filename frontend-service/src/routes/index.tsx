@@ -1,17 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import type React from "react";
+import { useState } from "react";
 import { useKeycloakAuth } from "../integrations/keycloak/root-provider";
-
-type ShoppingList = {
-	createdAt?: string;
-	description?: string;
-	id: string;
-	items?: Array<{ name?: string }> | null;
-	name?: string;
-	title?: string;
-	updatedAt?: string;
-};
+import type { KeycloakProfile } from "keycloak-js";
+import ShoppingListModal from "@/components/ShoppingListModal";
+import { ShoppingList, ShoppingListItem } from "@/data/types";
 
 const SHOPPING_LISTS_ENDPOINT = "http://localhost:8080/api/shopping-lists";
 
@@ -254,32 +248,39 @@ function ListSkeleton() {
 }
 
 function ListGrid({ lists }: Readonly<{ lists: ShoppingList[] }>) {
+	const [selectedList, setSelectedList] = useState<ShoppingList | null>(null);
+
 	return (
-		<div className="grid gap-4 md:grid-cols-2">
-			{lists.map((list) => (
-				<article
-					className="rounded-xl border border-white/15 bg-white/5 p-5 shadow-lg"
-					key={list.id}
-				>
-					<header className="flex items-center justify-between">
-						<div>
-							<h2 className="text-xl font-semibold">
-								{list.name ?? list.title ?? "Untitled list"}
-							</h2>
-							<p className="text-sm text-slate-300">
-								Updated {formatTimestamp(list.updatedAt ?? list.createdAt)}
-							</p>
-						</div>
-						<span className="rounded-full border border-cyan-500/40 px-3 py-1 text-xs text-cyan-100">
-							{formatItemCount(list.items)} items
-						</span>
-					</header>
-					{list.description && (
-						<p className="mt-3 text-sm text-slate-200">{list.description}</p>
-					)}
-				</article>
-			))}
-		</div>
+		<>
+			<div className="grid gap-4 md:grid-cols-2">
+				{lists.map((list) => (
+					<button
+						type="button"
+						className="cursor-pointer rounded-xl border border-white/15 bg-white/5 p-5 shadow-lg transition-all hover:border-cyan-500/40 hover:bg-white/10 text-left w-full"
+						key={list.id}
+						onClick={() => setSelectedList(list)}
+					>
+						<header className="flex items-center justify-between">
+							<div>
+								<h2 className="text-xl font-semibold">
+									{list.name ?? "Untitled list"}
+								</h2>
+							</div>
+							<span className="rounded-full border border-cyan-500/40 px-3 py-1 text-xs text-cyan-100">
+								{formatItemCount(list.items)} items
+							</span>
+						</header>
+					</button>
+				))}
+			</div>
+
+			{selectedList && (
+				<ShoppingListModal
+					list={selectedList}
+					onClose={() => setSelectedList(null)}
+				/>
+			)}
+		</>
 	);
 }
 
@@ -312,20 +313,7 @@ async function fetchShoppingLists(token: string): Promise<ShoppingList[]> {
 	return Array.isArray(payload) ? payload : [];
 }
 
-function formatTimestamp(value?: string) {
-	if (!value) {
-		return "recently";
-	}
-
-	const parsed = new Date(value);
-	if (Number.isNaN(parsed.getTime())) {
-		return "recently";
-	}
-
-	return parsed.toLocaleString();
-}
-
-function formatItemCount(items?: Array<{ name?: string }> | null) {
+function formatItemCount(items?: ShoppingListItem[] | null): number {
 	if (!Array.isArray(items)) {
 		return 0;
 	}
@@ -333,12 +321,8 @@ function formatItemCount(items?: Array<{ name?: string }> | null) {
 }
 
 function getProfileName(
-	profile: {
-		firstName?: string | null;
-		lastName?: string | null;
-		username?: string;
-	} | null,
-) {
+	profile: KeycloakProfile | null,
+): string {
 	if (!profile) {
 		return "there";
 	}
