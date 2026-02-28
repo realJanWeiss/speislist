@@ -32,7 +32,7 @@ public class InventoryService {
         inventory.setName(name);
 
         final var userInventory = new UserInventory();
-        userInventory.setId(new UserInventoryId(user.getId(), inventory.getId()));
+        userInventory.setId(new UserInventoryId());
         userInventory.setUser(user);
         userInventory.setInventory(inventory);
 
@@ -89,8 +89,7 @@ public class InventoryService {
     @Transactional
     public void removeUserFromInventory(long inventoryId, @NotNull User user, String requestingUserId) {
         final var inventory = getInventoryEntityById(inventoryId, requestingUserId);
-        final var id = new UserInventoryId(user.getId(), inventory.getId());
-        userInventoryRepository.deleteById(id);
+        inventory.getUserInventories().removeIf(ui -> ui.getUser().getId().equals(user.getId()));
     }
 
     @Transactional
@@ -99,8 +98,7 @@ public class InventoryService {
         if (inventory.getUserInventories().size() == 1) {
             inventoryRepository.delete(inventory);
         } else {
-            final var id = new UserInventoryId(userId, inventory.getId());
-            userInventoryRepository.deleteById(id);
+            inventory.getUserInventories().removeIf(ui -> ui.getUser().getId().equals(userId));
         }
     }
 

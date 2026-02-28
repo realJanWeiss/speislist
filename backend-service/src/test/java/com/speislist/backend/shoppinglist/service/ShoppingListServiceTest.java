@@ -117,6 +117,29 @@ class ShoppingListServiceTest {
                     .extracting(usl -> usl.getUser().getId())
                     .containsExactly("user-123");
         }
+
+        @Test
+        @DisplayName("should initialize UserShoppingListId on UserShoppingList before save")
+        void shouldInitializeUserShoppingListIdBeforeSave() {
+            when(userService.getUserById("user-123")).thenReturn(testUser);
+            when(shoppingListRepository.save(any(ShoppingList.class))).thenAnswer(invocation -> {
+                ShoppingList saved = invocation.getArgument(0);
+                saved.setId(1L);
+                return saved;
+            });
+
+            shoppingListService.createShoppingList("Groceries", "user-123");
+
+            ArgumentCaptor<ShoppingList> captor = ArgumentCaptor.forClass(ShoppingList.class);
+            verify(shoppingListRepository).save(captor.capture());
+            ShoppingList savedList = captor.getValue();
+
+            assertThat(savedList.getUserShoppingLists()).hasSize(1);
+            UserShoppingList userShoppingList = savedList.getUserShoppingLists().iterator().next();
+            assertThat(userShoppingList.getId())
+                    .as("UserShoppingListId must be initialized before save so @MapsId can populate it")
+                    .isNotNull();
+        }
     }
 
     @Nested
@@ -324,7 +347,9 @@ class ShoppingListServiceTest {
 
             shoppingListService.removeUserFromShoppingList(1L, testUser, "user-123");
 
-            verify(userShoppingListRepository).deleteById(new UserShoppingListId("user-123", 1L));
+            assertThat(testShoppingList.getUserShoppingLists())
+                    .extracting(usl -> usl.getUser().getId())
+                    .doesNotContain("user-123");
         }
 
         @Test
@@ -334,8 +359,6 @@ class ShoppingListServiceTest {
 
             assertThatThrownBy(() -> shoppingListService.removeUserFromShoppingList(1L, testUser, "other-user"))
                     .isInstanceOf(ShoppingListNotFoundException.class);
-
-            verify(userShoppingListRepository, never()).deleteById(any());
         }
     }
 
@@ -372,7 +395,10 @@ class ShoppingListServiceTest {
 
             shoppingListService.leaveShoppingList(1L, "user-123");
 
-            verify(userShoppingListRepository).deleteById(new UserShoppingListId("user-123", 1L));
+            assertThat(testShoppingList.getUserShoppingLists()).hasSize(1);
+            assertThat(testShoppingList.getUserShoppingLists())
+                    .extracting(usl -> usl.getUser().getId())
+                    .containsExactly("another-user");
             verify(shoppingListRepository, never()).delete(any());
         }
 

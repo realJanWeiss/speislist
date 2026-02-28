@@ -54,7 +54,7 @@ public class SecurityConfiguration {
     @Bean
     @Order(2)
     public SecurityFilterChain mcpSecurity(HttpSecurity http) throws Exception {
-        http.securityMatcher("/mcp/**")
+        http.securityMatcher("/mcp")
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

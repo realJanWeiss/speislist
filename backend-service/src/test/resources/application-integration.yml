@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:integration-test;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    open-in-view: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://mock-keycloak.test/realms/speislist
+          jwk-set-uri: https://mock-keycloak.test/realms/speislist/protocol/openid-connect/certs
+  ai:
+    mcp:
+      server:
+        enabled: true
+        name: speislist
+        version: 1.0.0
+        stdio: false
+        type: sync
+        protocol: streamable

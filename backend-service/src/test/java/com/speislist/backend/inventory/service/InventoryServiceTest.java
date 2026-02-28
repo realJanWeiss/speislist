@@ -117,6 +117,29 @@ class InventoryServiceTest {
                     .extracting(ui -> ui.getUser().getId())
                     .containsExactly("user-123");
         }
+
+        @Test
+        @DisplayName("should initialize UserInventoryId on UserInventory before save")
+        void shouldInitializeUserInventoryIdBeforeSave() {
+            when(userService.getUserById("user-123")).thenReturn(testUser);
+            when(inventoryRepository.save(any(Inventory.class))).thenAnswer(invocation -> {
+                Inventory saved = invocation.getArgument(0);
+                saved.setId(1L);
+                return saved;
+            });
+
+            inventoryService.createInventory("Pantry", "user-123");
+
+            ArgumentCaptor<Inventory> captor = ArgumentCaptor.forClass(Inventory.class);
+            verify(inventoryRepository).save(captor.capture());
+            Inventory savedInventory = captor.getValue();
+
+            assertThat(savedInventory.getUserInventories()).hasSize(1);
+            UserInventory userInventory = savedInventory.getUserInventories().iterator().next();
+            assertThat(userInventory.getId())
+                    .as("UserInventoryId must be initialized before save so @MapsId can populate it")
+                    .isNotNull();
+        }
     }
 
     @Nested
@@ -320,7 +343,9 @@ class InventoryServiceTest {
 
             inventoryService.removeUserFromInventory(1L, testUser, "user-123");
 
-            verify(userInventoryRepository).deleteById(new UserInventoryId("user-123", 1L));
+            assertThat(testInventory.getUserInventories())
+                    .extracting(ui -> ui.getUser().getId())
+                    .doesNotContain("user-123");
         }
 
         @Test
@@ -330,8 +355,6 @@ class InventoryServiceTest {
 
             assertThatThrownBy(() -> inventoryService.removeUserFromInventory(1L, testUser, "other-user"))
                     .isInstanceOf(InventoryNotFoundException.class);
-
-            verify(userInventoryRepository, never()).deleteById(any());
         }
     }
 
@@ -368,7 +391,10 @@ class InventoryServiceTest {
 
             inventoryService.leaveInventory(1L, "user-123");
 
-            verify(userInventoryRepository).deleteById(new UserInventoryId("user-123", 1L));
+            assertThat(testInventory.getUserInventories()).hasSize(1);
+            assertThat(testInventory.getUserInventories())
+                    .extracting(ui -> ui.getUser().getId())
+                    .containsExactly("another-user");
             verify(inventoryRepository, never()).delete(any());
         }
 

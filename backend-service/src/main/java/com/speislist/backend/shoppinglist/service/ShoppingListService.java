@@ -32,7 +32,7 @@ public class ShoppingListService {
         shoppingList.setName(name);
 
         final var userShoppingList = new UserShoppingList();
-        userShoppingList.setId(new UserShoppingListId(user.getId(), shoppingList.getId()));
+        userShoppingList.setId(new UserShoppingListId());
         userShoppingList.setUser(user);
         userShoppingList.setShoppingList(shoppingList);
 
@@ -42,6 +42,7 @@ public class ShoppingListService {
         return ShoppingListMapper.toShoppingListDTO(shoppingList);
     }
 
+    @Transactional(readOnly = true)
     public List<ShoppingListDTO> getShoppingListsByUser(String userId) {
         return shoppingListRepository.findByUserId(userId).stream()
                 .map(ShoppingListMapper::toShoppingListDTO)
@@ -89,8 +90,7 @@ public class ShoppingListService {
     @Transactional
     public void removeUserFromShoppingList(long shoppingListId, @NotNull User user, String requestingUserId) {
         final var shoppingList = getShoppingListEntityById(shoppingListId, requestingUserId);
-        final var id = new UserShoppingListId(user.getId(), shoppingList.getId());
-        userShoppingListRepository.deleteById(id);
+        shoppingList.getUserShoppingLists().removeIf(usl -> usl.getUser().getId().equals(user.getId()));
     }
 
     @Transactional
@@ -99,8 +99,7 @@ public class ShoppingListService {
         if (shoppingList.getUserShoppingLists().size() == 1) {
             shoppingListRepository.delete(shoppingList);
         } else {
-            final var id = new UserShoppingListId(userId, shoppingList.getId());
-            userShoppingListRepository.deleteById(id);
+            shoppingList.getUserShoppingLists().removeIf(usl -> usl.getUser().getId().equals(userId));
         }
     }
 

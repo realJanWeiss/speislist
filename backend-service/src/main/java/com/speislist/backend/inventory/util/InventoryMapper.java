@@ -7,6 +7,8 @@ import com.speislist.backend.inventory.entity.InventoryItem;
 import com.speislist.backend.user.util.UserMapper;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @NoArgsConstructor(access = lombok.AccessLevel.PRIVATE)
 public class InventoryMapper {
 
@@ -19,11 +21,11 @@ public class InventoryMapper {
                         ? inventory.getUserInventories().stream()
                         .map(userInventory -> UserMapper.toUserDTO(userInventory.getUser()))
                         .toList()
-                        : null)
+                        : List.of())
                 .items(inventory.getItems() != null
                         ? inventory.getItems().stream()
                         .map(InventoryMapper::toInventoryItemDTO).toList()
-                        : null)
+                        : List.of())
                 .build();
     }
 
